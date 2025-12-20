@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGECO-ACCU - Sistema de Gestión</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="tailwind-config.js"></script>
+</head>
+
+<body
+    class="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 font-sans antialiased text-foreground">
+
+    <!-- Header -->
+    <header class="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div
+                    class="h-10 w-10 flex items-center justify-center bg-primary rounded-lg text-primary-foreground font-bold">
+                    <!-- Placeholder Logo if image missing -->
+                    S
+                </div>
+                <!-- If logo.svg exists, uncomment: <img src="assets/logo.svg" alt="SIGECO-ACCU" class="h-10 w-10" /> -->
+                <div>
+                    <h1 class="font-bold text-xl">ACCU</h1>
+                    <p class="text-xs text-muted-foreground">Sistema de Gestión Documental y Control de Costos</p>
+                </div>
+            </div>
+            <button
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 gap-2">
+                <i data-lucide="life-buoy" class="h-4 w-4"></i>
+                Soporte
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="container mx-auto px-4 py-16 text-center">
+        <div class="max-w-3xl mx-auto space-y-6">
+            <div
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent-foreground text-sm font-medium">
+                <i data-lucide="building-2" class="h-4 w-4"></i>
+                ACCU - Arquitectura con Criterio y Compromiso Único
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold leading-tight">
+                Sistema Integral de
+                <span class="block text-accent"> Gestión Empresarial</span>
+            </h1>
+            <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Optimiza la gestión documental y el control de costos de tu empresa con una plataforma
+                centralizada, segura y eficiente diseñada para el sector arquitectura y construcción.
+            </p>
+        </div>
+    </section>
+
+    <!-- Role Selection -->
+    <section class="container mx-auto px-4 pb-16">
+        <div class="text-center mb-10">
+            <h2 class="text-2xl font-bold mb-2">Selecciona tu Rol</h2>
+            <p class="text-muted-foreground">Accede al módulo correspondiente según tu perfil</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+
+            <!-- Administrativo Card -->
+            <div
+                class="rounded-lg border bg-card text-card-foreground shadow-sm group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 hover:border-accent/30 flex flex-col">
+                <div class="flex flex-col space-y-4 p-6">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i data-lucide="file-text" class="h-7 w-7 text-accent"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold leading-none tracking-tight mb-1">Administrativo</h3>
+                        <p class="text-sm text-muted-foreground">
+                            Gestión documental, control de archivos, boletas y reportes para la gerencia.
+                        </p>
+                    </div>
+                </div>
+                <div class="p-6 pt-0 flex-1 flex flex-col">
+                    <ul class="space-y-2 mb-6 flex-1">
+                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                            Gestión de documentos
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                            Control de boletas
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                            Reportes gerenciales
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                            Auditoría de actividades
+                        </li>
+                    </ul>
+                    <a href="login.html?role=admin">
+                        <button
+                            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full gap-2 group-hover:gap-3 transition-all">
+                            Acceder
+                            <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                        </button>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Jefe de Proyecto Card -->
+            <div
+                class="rounded-lg border bg-card text-card-foreground shadow-sm group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 hover:border-accent/30 flex flex-col">
+                <div class="flex flex-col space-y-4 p-6">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-chart-2/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i data-lucide="briefcase" class="h-7 w-7 text-accent"></i>
+                        <!-- Note: In source text-accent is used even if bg is chart-2/10 -->
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold leading-none tracking-tight mb-1">Jefe de Proyecto</h3>
+                        <p class="text-sm text-muted-foreground">
+                            Supervisión de proyectos, cronogramas, comunicación interna y gestión de equipos.
+                        </p>
+                    </div>
+                </div>
+                <div class="p-6 pt-0 flex-1 flex flex-col">
+                    <ul class="space-y-2 mb-6 flex-1">
+                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                            Control de proyectos
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                            Gestión de tareas
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                            Seguimiento de hitos
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                            Coordinación de equipos
+                        </li>
+                    </ul>
+                    <a href="login.html?role=jefe">
+                        <button
+                            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full gap-2 group-hover:gap-3 transition-all">
+                            Acceder
+                            <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                        </button>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Operativo Presupuestos Card -->
+            <div
+                class="rounded-lg border bg-card text-card-foreground shadow-sm group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 hover:border-accent/30 flex flex-col">
+                <div class="flex flex-col space-y-4 p-6">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-chart-3/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i data-lucide="calculator" class="h-7 w-7 text-accent"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold leading-none tracking-tight mb-1">Operativo - Presupuestos</h3>
+                        <p class="text-sm text-muted-foreground">
+                            Elaboración de presupuestos, control de costos, materiales y mano de obra.
+                        </p>
+                    </div>
+                </div>
+                <div class="p-6 pt-0 flex-1 flex flex-col">
+                    <ul class="space-y-2 mb-6 flex-1">
+                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                            Creación de presupuestos
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                            Control de costos
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                            Gestión de materiales
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div class="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                            Cotizaciones
+                        </li>
+                    </ul>
+                    <a href="login.html?role=operativo">
+                        <button
+                            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full gap-2 group-hover:gap-3 transition-all">
+                            Acceder
+                            <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                        </button>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="bg-card border-t border-border">
+        <div class="container mx-auto px-4 py-16">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="space-y-3">
+                    <div class="w-12 h-12 mx-auto rounded-lg bg-accent/10 flex items-center justify-center">
+                        <i data-lucide="file-text" class="h-6 w-6 text-accent"></i>
+                    </div>
+                    <h3 class="font-semibold">Gestión Documental</h3>
+                    <p class="text-sm text-muted-foreground">
+                        Centraliza todos tus documentos, boletas y reportes en un solo lugar con trazabilidad completa.
+                    </p>
+                </div>
+                <div class="space-y-3">
+                    <div class="w-12 h-12 mx-auto rounded-lg bg-accent/10 flex items-center justify-center">
+                        <i data-lucide="calculator" class="h-6 w-6 text-accent"></i>
+                    </div>
+                    <h3 class="font-semibold">Control de Costos</h3>
+                    <p class="text-sm text-muted-foreground">
+                        Automatiza la elaboración de presupuestos con cálculo de materiales, mano de obra y equipos.
+                    </p>
+                </div>
+                <div class="space-y-3">
+                    <div class="w-12 h-12 mx-auto rounded-lg bg-accent/10 flex items-center justify-center">
+                        <i data-lucide="briefcase" class="h-6 w-6 text-accent"></i>
+                    </div>
+                    <h3 class="font-semibold">Seguimiento de Proyectos</h3>
+                    <p class="text-sm text-muted-foreground">
+                        Monitorea el avance de tus proyectos con cronogramas, tareas y reportes en tiempo real.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-border bg-primary text-primary-foreground">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="h-8 w-8 flex items-center justify-center bg-primary-foreground text-primary font-bold rounded">
+                        <!-- Placeholder Logo if image missing -->
+                        S
+                    </div>
+                    <!-- <img src="assets/logo.svg" alt="SIGECO-ACCU" class="h-8 w-8" /> -->
+                    <div>
+                        <p class="font-semibold">SIGECO-ACCU</p>
+                        <p class="text-xs text-primary-foreground/70">© 2025 EnduraTech Solutions S.A.C.</p>
+                    </div>
+                </div>
+                <p class="text-sm text-primary-foreground/70">
+                    Sistema Web de Gestión Documental y Control de Costos para ACCU
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

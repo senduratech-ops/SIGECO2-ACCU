@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Presupuesto - Operativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="tailwind-config.js"></script>
+
+    <style>
+        .accordion-content {
+            transition: max-height 0.3s ease-out;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .accordion-content.active {
+            max-height: 1000px;
+            /* Arbitrary large value for animation */
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-btn[aria-expanded="true"] .accordion-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-foreground">
+
+    <div class="min-h-screen flex w-full">
+        <!-- Sidebar -->
+        <aside id="app-sidebar"
+            class="relative transition-[width] duration-300 hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-primary text-primary-foreground">
+            <div class="h-16 flex items-center px-6 border-b border-primary-foreground/10">
+                <span
+                    class="text-3xl font-extrabold tracking-tight sidebar-title overflow-hidden whitespace-nowrap">ACCU</span>
+            </div>
+            <!-- Toggle Button -->
+            <button id="sidebar-toggle" onclick="toggleSidebar()"
+                class="absolute -right-3 top-20 h-6 w-6 rounded-full bg-accent text-accent-foreground hover:bg-accent/80 shadow-md flex items-center justify-center transition-colors z-50 cursor-pointer border border-border">
+                <i data-lucide="chevron-left" class="h-4 w-4"></i>
+            </button>
+            <div class="flex-1 py-4 flex flex-col gap-1 px-3">
+                <div class="px-3 mb-2 text-xs font-semibold text-primary-foreground/70 uppercase tracking-wider">Menú
+                    Principal</div>
+                <a href="dashboard-operativo.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Dashboard
+                    </span></a>
+                <a href="operativo-presupuestos.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Presupuestos
+                    </span></a>
+                <a href="operativo-materiales.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="package" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Materiales
+                    </span></a>
+                <a href="operativo-mano-obra.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="hammer" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Mano de Obra
+                    </span></a>
+                <a href="operativo-reportes.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Reportes
+                    </span></a>
+
+                <div class="mt-auto pt-4 border-t border-primary-foreground/10">
+                    <a href="index.html"
+                        class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-destructive-foreground hover:bg-destructive/20">
+                        <i data-lucide="log-out" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                            Cerrar Sesión
+                        </span></a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <header
+                class="h-16 bg-card border-b border-border flex items-center justify-between px-6 gap-4 sticky top-0 z-10">
+                <div class="relative flex-1 max-w-md hidden md:flex">
+                    <i data-lucide="search"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"></i>
+                    <input type="text" placeholder="Buscar documentos, proyectos..."
+                        class="flex h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10 border-0">
+                </div>
+                <!-- Mobile Menu Button (kept from original logic) -->
+                <button class="lg:hidden p-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+
+                <div class="flex items-center gap-4 ml-auto lg:ml-0">
+                    <button
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 relative">
+                        <i data-lucide="bell" class="h-5 w-5"></i>
+                        <span
+                            class="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">3</span>
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <button
+                            class="inline-flex items-center gap-2 hover:bg-accent hover:text-accent-foreground p-2 rounded-md transition-colors">
+                            <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                                <span
+                                    class="flex h-full w-full items-center justify-center rounded-full bg-accent text-accent-foreground font-medium">
+                                    AR
+                                </span>
+                            </span>
+                            <span class="hidden md:inline text-sm font-medium">Ana Rodríguez</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 p-6 lg:p-8 overflow-auto">
+                <div class="max-w-4xl mx-auto space-y-6">
+
+                    <div class="flex items-center justify-between">
+                        <h1 class="text-2xl font-bold tracking-tight text-foreground">Nuevo Presupuesto</h1>
+                    </div>
+
+                    <!-- Title & Description Section -->
+                    <div class="bg-card rounded-lg p-6 space-y-4 border border-input shadow-sm">
+                        <div class="grid gap-2">
+                            <label class="text-sm font-medium text-muted-foreground uppercase">Titulo del
+                                Presupuesto</label>
+                            <input type="text"
+                                class="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                placeholder="Ej: Presupuesto Remodelación Hall">
+                        </div>
+                        <div class="grid gap-2">
+                            <label class="text-sm font-medium text-muted-foreground uppercase">Descripción /
+                                Alcance</label>
+                            <textarea
+                                class="flex min-h-[80px] w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                placeholder="Detalles generales del presupuesto..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Accordions Container -->
+                    <div class="space-y-3">
+
+                        <!-- MATERIALES -->
+                        <div class="border rounded-lg bg-card overflow-hidden shadow-sm">
+                            <button
+                                class="accordion-btn w-full flex items-center justify-between p-4 bg-primary/20 hover:bg-orange-200 transition-colors text-left"
+                                aria-expanded="false">
+                                <span
+                                    class="text-lg font-semibold text-foreground uppercase tracking-wide">Materiales</span>
+                                <i data-lucide="chevron-down" class="accordion-icon w-5 h-5 text-muted-foreground"></i>
+                            </button>
+                            <div class="accordion-content bg-card">
+                                <div class="p-4">
+                                    <div class="flex gap-2 mb-4">
+                                        <select
+                                            class="flex h-10 w-full items-center justify-between rounded-lg border border-input bg-background px-3 py-2.5 text-sm">
+                                            <option>Seleccionar Material...</option>
+                                            <option>Cemento Portland</option>
+                                            <option>Ladrillo Fiscal</option>
+                                            <option>Arena Fina</option>
+                                        </select>
+                                        <input type="number" placeholder="Cant."
+                                            class="flex h-10 w-24 rounded-lg border border-input px-3 py-2.5 text-sm">
+                                        <button
+                                            class="bg-primary text-primary-foreground rounded-lg px-4 py-2 text-sm hover:bg-orange-700">Agregar</button>
+                                    </div>
+                                    <div class="relative w-full overflow-auto">
+                                        <table class="w-full caption-bottom text-sm text-left">
+                                            <thead class="bg-primary text-primary-foreground">
+                                                <tr>
+                                                    <th class="p-2 font-medium">Nombre</th>
+                                                    <th class="p-2 font-medium">Cantidad</th>
+                                                    <th class="p-2 font-medium">Unidad</th>
+                                                    <th class="p-2 font-medium">Costo U.</th>
+                                                    <th class="p-2 font-medium text-right">Total</th>
+                                                    <th class="p-2 w-10"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="border-b border-primary-foreground/10order border-b">
+                                                    <td class="p-2">TUBO RECTANGULAR 2 X 1 X 1.5MM</td>
+                                                    <td class="p-2">2</td>
+                                                    <td class="p-2">TUBO</td>
+                                                    <td class="p-2">57.14</td>
+                                                    <td class="p-2 text-right">114.28</td>
+                                                    <td class="p-2"><button
+                                                            class="text-destructive-foreground hover:bg-destructive/20 p-1 rounded"><i
+                                                                data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                                                </tr>
+                                                <tr class="border-b border-primary-foreground/10order border-b">
+                                                    <td class="p-2">CANAL U 2MM</td>
+                                                    <td class="p-2">3</td>
+                                                    <td class="p-2">UND</td>
+                                                    <td class="p-2">42.37</td>
+                                                    <td class="p-2 text-right">127.11</td>
+                                                    <td class="p-2"><button
+                                                            class="text-destructive-foreground hover:bg-destructive/20 p-1 rounded"><i
+                                                                data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot class="bg-background font-semibold">
+                                                <tr>
+                                                    <td colspan="4" class="p-2 text-right">Suma</td>
+                                                    <td class="p-2 text-right">241.39</td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MANO DE OBRA -->
+                        <div class="border rounded-lg bg-card overflow-hidden shadow-sm">
+                            <button
+                                class="accordion-btn w-full flex items-center justify-between p-4 bg-primary/20 hover:bg-orange-200 transition-colors text-left"
+                                aria-expanded="false">
+                                <span class="text-lg font-semibold text-foreground uppercase tracking-wide">Mano de
+                                    Obra</span>
+                                <i data-lucide="chevron-down" class="accordion-icon w-5 h-5 text-muted-foreground"></i>
+                            </button>
+                            <div class="accordion-content bg-card">
+                                <div class="p-4">
+                                    <div class="flex gap-2 mb-4">
+                                        <select
+                                            class="flex h-10 w-full rounded-lg border border-input px-3 py-2.5 text-sm">
+                                            <option>OPERARIO MELAMINERO HH EXTRA</option>
+                                            <option>AYUDANTE GENERAL</option>
+                                        </select>
+                                        <button
+                                            class="bg-primary text-primary-foreground rounded-lg px-4 py-2 text-sm hover:bg-orange-700">Agregar</button>
+                                        <button
+                                            class="bg-card border hover:bg-gray-50 rounded-lg px-4 py-2 text-sm">Borrar</button>
+                                    </div>
+                                    <table class="w-full text-sm text-left">
+                                        <thead class="bg-primary text-primary-foreground">
+                                            <tr>
+                                                <th class="p-2">Cargo</th>
+                                                <th class="p-2">Descripción</th>
+                                                <th class="p-2">Costo x Hora</th>
+                                                <th class="p-2">Horas</th>
+                                                <th class="p-2">Personas</th>
+                                                <th class="p-2 text-right">Costo Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="border-b border-primary-foreground/10 hover:bg-gray-50">
+                                                <td class="p-2">OPERARIO MELAMINERO HH EXTRA</td>
+                                                <td class="p-2">-</td>
+                                                <td class="p-2">11.41</td>
+                                                <td class="p-2">2</td>
+                                                <td class="p-2">1</td>
+                                                <td class="p-2 text-right">22.82</td>
+                                            </tr>
+                                            <tr class="border-b border-primary-foreground/10 hover:bg-gray-50">
+                                                <td class="p-2">OPERARIO MELAMINERO HH EXTRA</td>
+                                                <td class="p-2">-</td>
+                                                <td class="p-2">11.41</td>
+                                                <td class="p-2">4</td>
+                                                <td class="p-2">3</td>
+                                                <td class="p-2 text-right">136.92</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot class="bg-background font-semibold">
+                                            <tr>
+                                                <td colspan="5" class="p-2 text-right">Suma</td>
+                                                <td class="p-2 text-right">159.74</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="5" class="p-2 text-right">Factor (1.1)</td>
+                                                <td class="p-2 text-right">175.71</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TERCEROS -->
+                        <div class="border rounded-lg bg-card overflow-hidden shadow-sm">
+                            <button
+                                class="accordion-btn w-full flex items-center justify-between p-4 bg-primary/20 hover:bg-orange-200 transition-colors text-left"
+                                aria-expanded="false">
+                                <span
+                                    class="text-lg font-semibold text-foreground uppercase tracking-wide">Terceros</span>
+                                <i data-lucide="chevron-down" class="accordion-icon w-5 h-5 text-muted-foreground"></i>
+                            </button>
+                            <div class="accordion-content bg-card">
+                                <div class="p-4 space-y-4">
+                                    <!-- Input Form -->
+                                    <div
+                                        class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-muted/30 p-4 rounded-lg border">
+                                        <input type="text" id="terceros-servicio" placeholder="Servicio"
+                                            class="flex h-10 w-full rounded-lg border border-input px-3 py-2 text-sm">
+                                        <input type="text" id="terceros-descripcion" placeholder="Descripción"
+                                            class="flex h-10 w-full rounded-lg border border-input px-3 py-2 text-sm">
+                                        <input type="number" id="terceros-costo" placeholder="Costo"
+                                            class="flex h-10 w-full rounded-lg border border-input px-3 py-2 text-sm text-right">
+                                        <button onclick="addTercero()" id="btn-add-tercero"
+                                            class="bg-primary text-primary-foreground rounded-lg px-4 py-2 text-sm hover:bg-primary/90">Agregar</button>
+                                    </div>
+
+                                    <table class="w-full text-sm text-left border">
+                                        <thead class="bg-primary text-primary-foreground">
+                                            <tr>
+                                                <th class="p-2">Servicio</th>
+                                                <th class="p-2">Descripción</th>
+                                                <th class="p-2 text-right">Costo</th>
+                                                <th class="p-2 text-center w-24">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="table-terceros">
+                                            <!-- Dynamic Content -->
+                                        </tbody>
+                                        <tfoot
+                                            class="bg-background font-semibold border-t border-primary-foreground/10">
+                                            <tr>
+                                                <td colspan="2" class="p-2 text-right">Suma</td>
+                                                <td class="p-2 text-right" id="total-terceros">0.00</td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VIATICOS -->
+                        <div class="border rounded-lg bg-card overflow-hidden shadow-sm">
+                            <button
+                                class="accordion-btn w-full flex items-center justify-between p-4 bg-primary/20 hover:bg-orange-200 transition-colors text-left"
+                                aria-expanded="false">
+                                <span
+                                    class="text-lg font-semibold text-foreground uppercase tracking-wide">Viáticos</span>
+                                <i data-lucide="chevron-down" class="accordion-icon w-5 h-5 text-muted-foreground"></i>
+                            </button>
+                            <div class="accordion-content bg-card">
+                                <div class="p-4 space-y-4">
+                                    <!-- Input Form -->
+                                    <div
+                                        class="grid grid-cols-1 md:grid-cols-5 gap-4 bg-muted/30 p-4 rounded-lg border">
+                                        <input type="text" id="viaticos-descripcion" placeholder="Descripción"
+                                            class="flex h-10 w-full rounded-lg border border-input px-3 py-2 text-sm md:col-span-2">
+                                        <input type="number" id="viaticos-costo" placeholder="Costo"
+                                            class="flex h-10 w-full rounded-lg border border-input px-3 py-2 text-sm text-right">
+                                        <div class="flex gap-2 md:col-span-2">
+                                            <input type="number" id="viaticos-personas" placeholder="Pers."
+                                                class="flex h-10 w-full rounded-lg border border-input px-3 py-2 text-sm">
+                                            <input type="number" id="viaticos-dias" placeholder="Días"
+                                                class="flex h-10 w-full rounded-lg border border-input px-3 py-2 text-sm">
+                                            <button onclick="addViatico()" id="btn-add-viatico"
+                                                class="bg-primary text-primary-foreground rounded-lg px-4 py-2 text-sm hover:bg-primary/90">Agregar</button>
+                                        </div>
+                                    </div>
+
+                                    <table class="w-full text-sm text-left border">
+                                        <thead class="bg-primary text-primary-foreground">
+                                            <tr>
+                                                <th class="p-2">Descripción</th>
+                                                <th class="p-2 text-right">Costo</th>
+                                                <th class="p-2 text-center">Personas</th>
+                                                <th class="p-2 text-center">Días</th>
+                                                <th class="p-2 text-right">Total</th>
+                                                <th class="p-2 text-center w-24">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="table-viaticos">
+                                            <!-- Dynamic Content -->
+                                        </tbody>
+                                        <tfoot
+                                            class="bg-background font-semibold border-t border-primary-foreground/10">
+                                            <tr>
+                                                <td colspan="4" class="p-2 text-right">Suma</td>
+                                                <td class="p-2 text-right" id="total-viaticos">0.00</td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- IMPRESIONES -->
+                        <div class="border rounded-lg bg-card overflow-hidden shadow-sm">
+                            <button
+                                class="accordion-btn w-full flex items-center justify-between p-4 bg-primary/20 hover:bg-orange-200 transition-colors text-left"
+                                aria-expanded="false">
+                                <span
+                                    class="text-lg font-semibold text-foreground uppercase tracking-wide">Impresiones</span>
+                                <i data-lucide="chevron-down" class="accordion-icon w-5 h-5 text-muted-foreground"></i>
+                            </button>
+                            <div class="accordion-content bg-card">
+                                <div class="p-4 space-y-4">
+                                    <!-- Input Form -->
+                                    <div
+                                        class="grid grid-cols-1 md:grid-cols-6 gap-4 bg-muted/30 p-4 rounded-lg border">
+                                        <input type="text" id="imp-nombre" placeholder="Impresión"
+                                            class="flex h-10 w-full rounded-lg border border-input px-3 py-2 text-sm md:col-span-2">
+                                        <input type="number" id="imp-ancho" placeholder="Ancho (m)"
+                                            class="flex h-10 w-full rounded-lg border border-input px-3 py-2 text-sm">
+                                        <input type="number" id="imp-largo" placeholder="Largo (m)"
+                                            class="flex h-10 w-full rounded-lg border border-input px-3 py-2 text-sm">
+                                        <input type="number" id="imp-cant" placeholder="Cant."
+                                            class="flex h-10 w-full rounded-lg border border-input px-3 py-2 text-sm">
+                                        <div class="flex gap-2">
+                                            <input type="number" id="imp-costo" placeholder="Costo U."
+                                                class="flex h-10 w-full rounded-lg border border-input px-3 py-2 text-sm">
+                                            <button onclick="addImpresion()" id="btn-add-imp"
+                                                class="bg-primary text-primary-foreground rounded-lg px-4 py-2 text-sm hover:bg-primary/90">Agregar</button>
+                                        </div>
+                                    </div>
+
+                                    <table class="w-full text-sm text-left border">
+                                        <thead class="bg-primary text-primary-foreground">
+                                            <tr>
+                                                <th class="p-2">Impresión</th>
+                                                <th class="p-2 text-center">Dimensiones</th>
+                                                <th class="p-2 text-center">Cant.</th>
+                                                <th class="p-2 text-right">Costo U.</th>
+                                                <th class="p-2 text-right">Total</th>
+                                                <th class="p-2 text-center w-24">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="table-impresiones">
+                                            <!-- Dynamic Content -->
+                                        </tbody>
+                                        <tfoot
+                                            class="bg-background font-semibold border-t border-primary-foreground/10">
+                                            <tr>
+                                                <td colspan="4" class="p-2 text-right">Suma</td>
+                                                <td class="p-2 text-right" id="total-impresiones">0.00</td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-6">
+                            <button
+                                class="px-6 py-2 bg-card border rounded-lg hover:bg-gray-50 text-muted-foreground">Cancelar</button>
+                            <button
+                                class="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-orange-700">Guardar
+                                Presupuesto</button>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Accordion functionality
+        document.querySelectorAll('.accordion-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+                // Toggle current
+                button.setAttribute('aria-expanded', !isExpanded);
+                content.classList.toggle('active');
+            });
+        });
+
+        // --- Logic for Dynamic Tables ---
+
+        // State Storage
+        let dataTerceros = [];
+        let dataViaticos = [];
+        let dataImpresiones = [];
+
+        let editIndexT = -1;
+        let editIndexV = -1;
+        let editIndexI = -1;
+
+        // --- TERCEROS ---
+        function renderTerceros() {
+            const tbody = document.getElementById('table-terceros');
+            tbody.innerHTML = '';
+            let total = 0;
+            dataTerceros.forEach((item, index) => {
+                total += parseFloat(item.costo);
+                tbody.innerHTML += `
+                    <tr class="border-b border-primary-foreground/10 hover:bg-gray-50">
+                        <td class="p-2">${item.servicio}</td>
+                        <td class="p-2 text-muted-foreground">${item.descripcion}</td>
+                        <td class="p-2 text-right font-mono">${parseFloat(item.costo).toFixed(2)}</td>
+                        <td class="p-2 text-center flex justify-center gap-1">
+                            <button onclick="editTercero(${index})" class="p-1 hover:bg-blue-100 text-blue-600 rounded"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                            <button onclick="deleteTercero(${index})" class="p-1 hover:bg-red-100 text-red-600 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('total-terceros').textContent = total.toFixed(2);
+            lucide.createIcons();
+        }
+
+        function addTercero() {
+            const servicio = document.getElementById('terceros-servicio').value;
+            const desc = document.getElementById('terceros-descripcion').value;
+            const costo = document.getElementById('terceros-costo').value;
+
+            if (!servicio || !costo) return alert("Complete los campos requeridos");
+
+            if (editIndexT >= 0) {
+                // Update
+                dataTerceros[editIndexT] = { servicio, descripcion: desc, costo };
+                editIndexT = -1;
+                document.getElementById('btn-add-tercero').textContent = "Agregar";
+                document.getElementById('btn-add-tercero').classList.remove('bg-green-600', 'hover:bg-green-700');
+            } else {
+                // Add
+                dataTerceros.push({ servicio, descripcion: desc, costo });
+            }
+
+            // Clear Inputs
+            document.getElementById('terceros-servicio').value = '';
+            document.getElementById('terceros-descripcion').value = '';
+            document.getElementById('terceros-costo').value = '';
+
+            renderTerceros();
+        }
+
+        function editTercero(index) {
+            const item = dataTerceros[index];
+            document.getElementById('terceros-servicio').value = item.servicio;
+            document.getElementById('terceros-descripcion').value = item.descripcion;
+            document.getElementById('terceros-costo').value = item.costo;
+
+            editIndexT = index;
+            const btn = document.getElementById('btn-add-tercero');
+            btn.textContent = "Actualizar";
+            btn.classList.add('bg-green-600', 'hover:bg-green-700');
+        }
+
+        function deleteTercero(index) {
+            if (confirm("¿Eliminar item?")) {
+                dataTerceros.splice(index, 1);
+                renderTerceros();
+            }
+        }
+
+        // --- VIATICOS ---
+        function renderViaticos() {
+            const tbody = document.getElementById('table-viaticos');
+            tbody.innerHTML = '';
+            let total = 0;
+            dataViaticos.forEach((item, index) => {
+                const subtotal = item.costo * item.personas * item.dias;
+                total += subtotal;
+                tbody.innerHTML += `
+                     <tr class="border-b border-primary-foreground/10 hover:bg-gray-50">
+                        <td class="p-2">${item.descripcion}</td>
+                        <td class="p-2 text-right font-mono">${parseFloat(item.costo).toFixed(2)}</td>
+                        <td class="p-2 text-center">${item.personas}</td>
+                        <td class="p-2 text-center">${item.dias}</td>
+                        <td class="p-2 text-right font-bold">${subtotal.toFixed(2)}</td>
+                        <td class="p-2 text-center flex justify-center gap-1">
+                            <button onclick="editViatico(${index})" class="p-1 hover:bg-blue-100 text-blue-600 rounded"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                            <button onclick="deleteViatico(${index})" class="p-1 hover:bg-red-100 text-red-600 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('total-viaticos').textContent = total.toFixed(2);
+            lucide.createIcons();
+        }
+
+        function addViatico() {
+            const desc = document.getElementById('viaticos-descripcion').value;
+            const costo = document.getElementById('viaticos-costo').value;
+            const personas = document.getElementById('viaticos-personas').value;
+            const dias = document.getElementById('viaticos-dias').value;
+
+            if (!desc || !costo || !personas || !dias) return alert("Complete todos los campos");
+
+            if (editIndexV >= 0) {
+                dataViaticos[editIndexV] = { descripcion: desc, costo, personas, dias };
+                editIndexV = -1;
+                const btn = document.getElementById('btn-add-viatico');
+                btn.textContent = "Agregar";
+                btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            } else {
+                dataViaticos.push({ descripcion: desc, costo, personas, dias });
+            }
+
+            document.getElementById('viaticos-descripcion').value = '';
+            document.getElementById('viaticos-costo').value = '';
+            document.getElementById('viaticos-personas').value = '';
+            document.getElementById('viaticos-dias').value = '';
+            renderViaticos();
+        }
+
+        function editViatico(index) {
+            const item = dataViaticos[index];
+            document.getElementById('viaticos-descripcion').value = item.descripcion;
+            document.getElementById('viaticos-costo').value = item.costo;
+            document.getElementById('viaticos-personas').value = item.personas;
+            document.getElementById('viaticos-dias').value = item.dias;
+
+            editIndexV = index;
+            const btn = document.getElementById('btn-add-viatico');
+            btn.textContent = "Actualizar";
+            btn.classList.add('bg-green-600', 'hover:bg-green-700');
+        }
+
+        function deleteViatico(index) {
+            if (confirm("¿Eliminar viático?")) {
+                dataViaticos.splice(index, 1);
+                renderViaticos();
+            }
+        }
+
+        // --- IMPRESIONES ---
+        function renderImpresiones() {
+            const tbody = document.getElementById('table-impresiones');
+            tbody.innerHTML = '';
+            let total = 0;
+            dataImpresiones.forEach((item, index) => {
+                const subtotal = item.costo * item.cant; // Simplified calculation: Costo U * Cant (Ignoring dimensions for price logic here unless specified)
+                // Note: Original static data implied dimensions but calculation was obscure (15 * ? = 637.5). 
+                // Wait, 0.5 * 2.5 * 2 * 15 = 37.5. The static example 637.50 is weird for 15 unit cost.
+                // Resetting logic to: Cost is per Unit. Total = Cost * Cant. 
+                // If Area matter, user didn't specify formula. I'll stick to Cost U * Cant for now or Area * Cost * Cant.
+                // Let's assume Cost is per m2 if dimensions are present?
+                // Let's use simple logic: Costo U * Cant. OR Costo (m2) * Ancho * Largo * Cant.
+                // Let's assume Cost is 'Unit Price per item' to be safe, or 'Price per m2'.
+                // Let's genericize: Total = Costo * Cant.
+                // Actually, if dimensions are there, usually it's Area * Price.
+                // Let's implement: Total = Ancho * Largo * Costo * Cant.
+
+                const area = item.ancho * item.largo;
+                const finalTotal = area * item.cant * item.costo;
+
+                total += finalTotal;
+                tbody.innerHTML += `
+                     <tr class="border-b border-primary-foreground/10 hover:bg-gray-50">
+                        <td class="p-2">${item.nombre}</td>
+                        <td class="p-2 text-center text-muted-foreground text-xs">${item.ancho}m x ${item.largo}m</td>
+                        <td class="p-2 text-center">${item.cant}</td>
+                        <td class="p-2 text-right font-mono">${parseFloat(item.costo).toFixed(2)}</td>
+                        <td class="p-2 text-right font-bold">${finalTotal.toFixed(2)}</td>
+                         <td class="p-2 text-center flex justify-center gap-1">
+                            <button onclick="editImpresion(${index})" class="p-1 hover:bg-blue-100 text-blue-600 rounded"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                            <button onclick="deleteImpresion(${index})" class="p-1 hover:bg-red-100 text-red-600 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('total-impresiones').textContent = total.toFixed(2);
+            lucide.createIcons();
+        }
+
+        function addImpresion() {
+            const nombre = document.getElementById('imp-nombre').value;
+            const ancho = document.getElementById('imp-ancho').value;
+            const largo = document.getElementById('imp-largo').value;
+            const cant = document.getElementById('imp-cant').value;
+            const costo = document.getElementById('imp-costo').value;
+
+            if (!nombre || !ancho || !largo || !cant || !costo) return alert("Complete todos los campos");
+
+            if (editIndexI >= 0) {
+                dataImpresiones[editIndexI] = { nombre, ancho, largo, cant, costo };
+                editIndexI = -1;
+                const btn = document.getElementById('btn-add-imp');
+                btn.textContent = "Agregar";
+                btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            } else {
+                dataImpresiones.push({ nombre, ancho, largo, cant, costo });
+            }
+
+            // Clear
+            ['imp-nombre', 'imp-ancho', 'imp-largo', 'imp-cant', 'imp-costo'].forEach(id => document.getElementById(id).value = '');
+            renderImpresiones();
+        }
+
+        function editImpresion(index) {
+            const item = dataImpresiones[index];
+            document.getElementById('imp-nombre').value = item.nombre;
+            document.getElementById('imp-ancho').value = item.ancho;
+            document.getElementById('imp-largo').value = item.largo;
+            document.getElementById('imp-cant').value = item.cant;
+            document.getElementById('imp-costo').value = item.costo;
+
+            editIndexI = index;
+            const btn = document.getElementById('btn-add-imp');
+            btn.textContent = "Actualizar";
+            btn.classList.add('bg-green-600', 'hover:bg-green-700');
+        }
+
+        function deleteImpresion(index) {
+            if (confirm("¿Eliminar impresión?")) {
+                dataImpresiones.splice(index, 1);
+                renderImpresiones();
+            }
+        }
+
+        // Init Dummy Data
+        // dataTerceros = [{servicio: "Servicio 1", descripcion: "Placas", costo: 500}];
+        // renderTerceros();
+
+    </script>
+</body>
+
+</html>

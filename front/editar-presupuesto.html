@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Presupuesto - Operativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="tailwind-config.js"></script>
+    <style>
+        .accordion-header {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .accordion-header:hover {
+            opacity: 0.9;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .accordion-content.open {
+            max-height: 2000px;
+        }
+
+        .section-materiales {
+            background: #f4e4d4;
+        }
+
+        .section-mano-obra {
+            background: #e0e0e0;
+        }
+
+        .section-terceros {
+            background: #e0e0e0;
+        }
+
+        .section-viaticos {
+            background: #e8e8dc;
+        }
+
+        .section-impresiones {
+            background: #e8e8dc;
+        }
+
+        .table-header {
+            background: #1a2e35;
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-foreground">
+
+    <div class="min-h-screen flex w-full">
+        <!-- Sidebar -->
+        <aside id="app-sidebar"
+            class="relative transition-[width] duration-300 hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-primary text-primary-foreground">
+            <div class="h-16 flex items-center px-6 border-b border-primary-foreground/10">
+                <span
+                    class="text-3xl font-extrabold tracking-tight sidebar-title overflow-hidden whitespace-nowrap">ACCU</span>
+            </div>
+            <button id="sidebar-toggle" onclick="toggleSidebar()"
+                class="absolute -right-3 top-20 h-6 w-6 rounded-full bg-accent text-accent-foreground hover:bg-accent/80 shadow-md flex items-center justify-center transition-colors z-50 cursor-pointer border border-border">
+                <i data-lucide="chevron-left" class="h-4 w-4"></i>
+            </button>
+            <div class="flex-1 py-4 flex flex-col gap-1 px-3">
+                <div class="px-3 mb-2 text-xs font-semibold text-primary-foreground/70 uppercase tracking-wider">Menú
+                    Principal</div>
+                <a href="dashboard-operativo.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span
+                        class="sidebar-text truncate">Dashboard</span></a>
+                <a href="operativo-presupuestos.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg bg-accent text-accent-foreground font-medium">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i><span
+                        class="sidebar-text truncate">Presupuestos</span></a>
+                <a href="operativo-materiales.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10">
+                    <i data-lucide="package" class="w-4 h-4"></i><span
+                        class="sidebar-text truncate">Materiales</span></a>
+                <a href="operativo-mano-obra.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10">
+                    <i data-lucide="hammer" class="w-4 h-4"></i><span class="sidebar-text truncate">Mano de
+                        Obra</span></a>
+                <div class="mt-auto pt-4 border-t border-primary-foreground/10">
+                    <a href="index.html"
+                        class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-destructive-foreground hover:bg-destructive/20">
+                        <i data-lucide="log-out" class="w-4 h-4"></i><span class="sidebar-text truncate">Cerrar
+                            Sesión</span></a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <header
+                class="h-16 bg-card border-b border-border flex items-center justify-between px-6 gap-4 sticky top-0 z-10">
+                <a href="operativo-presupuestos.html"
+                    class="text-muted-foreground hover:text-foreground flex items-center gap-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver a Presupuestos
+                </a>
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                        <span
+                            class="flex h-full w-full items-center justify-center rounded-full bg-accent text-accent-foreground font-medium">AR</span>
+                    </span>
+                    <span class="hidden md:inline text-sm font-medium">Ana Rodríguez</span>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 p-6 lg:p-8 overflow-auto">
+                <h1 class="text-3xl font-bold tracking-tight text-foreground mb-6">Editar Presupuesto</h1>
+
+                <!-- Info del Proyecto (solo lectura en edición) -->
+                <div class="mb-6 p-4 bg-card rounded-lg border border-border shadow-sm">
+                    <label class="block text-sm font-medium mb-2">Proyecto</label>
+                    <p id="project-name" class="text-lg font-semibold">Cargando...</p>
+                </div>
+
+                <!-- Formulario Principal (visible solo si hay proyecto) -->
+                <div id="budget-form-container" class="hidden space-y-6">
+                    <!-- Cabecera -->
+                    <div class="bg-card rounded-lg border border-border p-6 shadow-sm space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Título del
+                                Presupuesto</label>
+                            <input type="text" id="titulo" placeholder="Ej: Presupuesto Remodelación Hall"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Descripción
+                                / Alcance</label>
+                            <textarea id="descripcion" rows="3" placeholder="Detalles generales del presupuesto..."
+                                class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-y"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Sección: MATERIALES -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="accordion-header section-materiales px-4 py-3 flex justify-between items-center"
+                            onclick="toggleAccordion('materiales')">
+                            <span class="font-bold text-lg">MATERIALES</span>
+                            <i data-lucide="chevron-down" id="icon-materiales" class="w-5 h-5 transition-transform"></i>
+                        </div>
+                        <div id="content-materiales" class="accordion-content bg-white p-4">
+                            <div class="flex gap-2 mb-4 flex-wrap">
+                                <select id="mat-select"
+                                    class="flex-1 min-w-[200px] h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                    <option value="">Seleccionar Material...</option>
+                                </select>
+                                <input type="number" id="mat-cantidad" placeholder="Cant." min="0"
+                                    class="w-24 h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <button onclick="agregarMaterial()"
+                                    class="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium">Agregar</button>
+                            </div>
+                            <table class="w-full text-sm">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Nombre</th>
+                                        <th class="px-4 py-2 text-center">Cantidad</th>
+                                        <th class="px-4 py-2 text-center">Unidad</th>
+                                        <th class="px-4 py-2 text-right">Costo U.</th>
+                                        <th class="px-4 py-2 text-right">Total</th>
+                                        <th class="px-4 py-2 text-center">Acc.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-materiales"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-materiales" class="px-4 py-2 text-right">0.00</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Sección: MANO DE OBRA -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="accordion-header section-mano-obra px-4 py-3 flex justify-between items-center"
+                            onclick="toggleAccordion('mano-obra')">
+                            <span class="font-bold text-lg">MANO DE OBRA</span>
+                            <i data-lucide="chevron-down" id="icon-mano-obra" class="w-5 h-5 transition-transform"></i>
+                        </div>
+                        <div id="content-mano-obra" class="accordion-content bg-white p-4">
+                            <div class="flex gap-2 mb-4 flex-wrap">
+                                <select id="mo-select"
+                                    class="flex-1 min-w-[200px] h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    onchange="onLaborSelect()">
+                                    <option value="">Seleccionar Cargo...</option>
+                                </select>
+                                <input type="number" id="mo-costo-hora" placeholder="S//Hora" min="0"
+                                    class="w-24 h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <input type="number" id="mo-horas" placeholder="Horas" min="0"
+                                    class="w-20 h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <input type="number" id="mo-personas" placeholder="Pers." min="0"
+                                    class="w-20 h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <button onclick="agregarManoObra()"
+                                    class="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium">Agregar</button>
+                            </div>
+                            <table class="w-full text-sm">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Cargo</th>
+                                        <th class="px-4 py-2 text-right">Costo x Hora</th>
+                                        <th class="px-4 py-2 text-center">Horas</th>
+                                        <th class="px-4 py-2 text-center">Personas</th>
+                                        <th class="px-4 py-2 text-right">Costo Total</th>
+                                        <th class="px-4 py-2 text-center">Acc.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-mano-obra"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-mano-obra" class="px-4 py-2 text-right">0.00</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Factor (1.1)</td>
+                                        <td id="factor-mano-obra" class="px-4 py-2 text-right">0.00</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Sección: TERCEROS -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="accordion-header section-terceros px-4 py-3 flex justify-between items-center"
+                            onclick="toggleAccordion('terceros')">
+                            <span class="font-bold text-lg">TERCEROS</span>
+                            <i data-lucide="chevron-down" id="icon-terceros" class="w-5 h-5 transition-transform"></i>
+                        </div>
+                        <div id="content-terceros" class="accordion-content bg-white p-4">
+                            <div class="flex gap-2 mb-4 flex-wrap">
+                                <input type="text" id="ter-servicio" placeholder="Servicio"
+                                    class="flex-1 min-w-[150px] h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <input type="text" id="ter-descripcion" placeholder="Descripción"
+                                    class="flex-1 min-w-[150px] h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <input type="number" id="ter-costo" placeholder="Costo" min="0"
+                                    class="w-28 h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <button onclick="agregarTercero()"
+                                    class="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium">Agregar</button>
+                            </div>
+                            <table class="w-full text-sm">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Servicio</th>
+                                        <th class="px-4 py-2 text-left">Descripción</th>
+                                        <th class="px-4 py-2 text-right">Costo</th>
+                                        <th class="px-4 py-2 text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-terceros"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="2" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-terceros" class="px-4 py-2 text-right">0.00</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Sección: VIÁTICOS -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="accordion-header section-viaticos px-4 py-3 flex justify-between items-center"
+                            onclick="toggleAccordion('viaticos')">
+                            <span class="font-bold text-lg">VIÁTICOS</span>
+                            <i data-lucide="chevron-down" id="icon-viaticos" class="w-5 h-5 transition-transform"></i>
+                        </div>
+                        <div id="content-viaticos" class="accordion-content bg-white p-4">
+                            <div class="flex gap-2 mb-4 flex-wrap">
+                                <input type="text" id="via-descripcion" placeholder="Descripción"
+                                    class="flex-1 min-w-[150px] h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <input type="number" id="via-costo" placeholder="Costo" min="0"
+                                    class="w-24 h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <input type="number" id="via-personas" placeholder="Pers." min="0"
+                                    class="w-20 h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <input type="number" id="via-dias" placeholder="Días" min="0"
+                                    class="w-20 h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <button onclick="agregarViatico()"
+                                    class="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium">Agregar</button>
+                            </div>
+                            <table class="w-full text-sm">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Descripción</th>
+                                        <th class="px-4 py-2 text-right">Costo</th>
+                                        <th class="px-4 py-2 text-center">Personas</th>
+                                        <th class="px-4 py-2 text-center">Días</th>
+                                        <th class="px-4 py-2 text-right">Total</th>
+                                        <th class="px-4 py-2 text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-viaticos"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-viaticos" class="px-4 py-2 text-right">0.00</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Sección: IMPRESIONES -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="accordion-header section-impresiones px-4 py-3 flex justify-between items-center"
+                            onclick="toggleAccordion('impresiones')">
+                            <span class="font-bold text-lg">IMPRESIONES</span>
+                            <i data-lucide="chevron-down" id="icon-impresiones"
+                                class="w-5 h-5 transition-transform"></i>
+                        </div>
+                        <div id="content-impresiones" class="accordion-content bg-white p-4">
+                            <div class="flex gap-2 mb-4 flex-wrap">
+                                <input type="text" id="imp-nombre" placeholder="Impresión"
+                                    class="flex-1 min-w-[150px] h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <input type="number" id="imp-ancho" placeholder="Ancho (m)" step="0.01" min="0"
+                                    class="w-24 h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <input type="number" id="imp-largo" placeholder="Largo (m)" step="0.01" min="0"
+                                    class="w-24 h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <input type="number" id="imp-cantidad" placeholder="Cant." min="0"
+                                    class="w-20 h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <input type="number" id="imp-costo-m2" placeholder="S//m²" step="0.01" min="0"
+                                    class="w-24 h-10 rounded-md border border-input px-3 py-2 text-sm">
+                                <button onclick="agregarImpresion()"
+                                    class="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium">Agregar</button>
+                            </div>
+                            <table class="w-full text-sm">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Impresión</th>
+                                        <th class="px-4 py-2 text-center">Dimensiones</th>
+                                        <th class="px-4 py-2 text-center">Cant.</th>
+                                        <th class="px-4 py-2 text-right">Costo U.</th>
+                                        <th class="px-4 py-2 text-right">Total</th>
+                                        <th class="px-4 py-2 text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-impresiones"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-impresiones" class="px-4 py-2 text-right">0.00</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Total General y Botones -->
+                    <div class="bg-card rounded-lg border border-border p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-xl font-bold">TOTAL GENERAL</span>
+                            <span id="total-general" class="text-3xl font-bold text-primary">S/ 0.00</span>
+                        </div>
+                        <div class="flex justify-end gap-4">
+                            <a href="operativo-presupuestos.html"
+                                class="px-6 py-2 rounded-md border border-input hover:bg-accent text-sm font-medium">Cancelar</a>
+                            <button onclick="guardarPresupuesto()"
+                                class="px-6 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-medium">Guardar
+                                Presupuesto</button>
+                            <button onclick="marcarCompletado()"
+                                class="px-6 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 text-sm font-medium flex items-center gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i> Marcar como Completado
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="config.js"></script>`n    <script src="script.js"></script>
+    <script>
+        let dataMateriales = [];
+        let dataManoObra = [];
+        let dataTerceros = [];
+        let dataViaticos = [];
+        let dataImpresiones = [];
+        let materialesDB = [];
+        let laborsDB = [];
+        let currentProjectId = null;
+        let currentBudgetId = null;
+        const FACTOR_MANO_OBRA = 1.1;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentBudgetId = urlParams.get('id');
+            if (!currentBudgetId) {
+                alert('No se especificó un presupuesto');
+                window.location.href = 'operativo-presupuestos.html';
+                return;
+            }
+            loadMaterialesDB();
+            loadLaborsDB();
+            loadBudgetData();
+            lucide.createIcons();
+
+            // Prevenir valores negativos en todos los inputs numéricos
+            preventNegativeInputs();
+        });
+
+        // Función para prevenir entrada de valores negativos
+        function preventNegativeInputs() {
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                // Bloquear tecla menos
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === '-' || e.key === 'Minus') {
+                        e.preventDefault();
+                    }
+                });
+                // Validar al cambiar valor (por si pegan un negativo)
+                input.addEventListener('input', function () {
+                    if (parseFloat(this.value) < 0) {
+                        this.value = Math.abs(parseFloat(this.value));
+                    }
+                });
+            });
+        }
+
+        // Cargar datos del presupuesto existente
+        async function loadBudgetData() {
+            try {
+                const res = await fetch(`${API_BASE}/budgets/${currentBudgetId}`);
+                if (!res.ok) throw new Error('Presupuesto no encontrado');
+                const data = await res.json();
+
+                currentProjectId = data.id_proyecto;
+
+                // Mostrar nombre del proyecto
+                const projRes = await fetch(`${API_BASE}/projects/${currentProjectId}`);
+                const proj = await projRes.json();
+                document.getElementById('project-name').textContent = proj.nombre || `Proyecto #${currentProjectId}`;
+
+                // Cargar cabecera
+                document.getElementById('titulo').value = data.titulo || '';
+                document.getElementById('descripcion').value = data.descripcion_alcance || '';
+
+                // Cargar materiales
+                dataMateriales = data.materiales.map(m => ({
+                    id_pm: m.id_pm,
+                    id_material: m.id_material,
+                    nombre: m.nombre,
+                    unidad: m.unidad_medida,
+                    cantidad: parseFloat(m.cantidad),
+                    costo_unitario: parseFloat(m.costo_unitario),
+                    total: parseFloat(m.total)
+                }));
+                renderMateriales();
+
+                // Cargar mano de obra
+                dataManoObra = data.mano_obra.map(m => ({
+                    id_pmo: m.id_pmo,
+                    cargo: m.cargo,
+                    costo_hora: parseFloat(m.costo_hora),
+                    horas: parseFloat(m.horas),
+                    personas: m.personas,
+                    total: parseFloat(m.total)
+                }));
+                renderManoObra();
+
+                // Cargar terceros
+                dataTerceros = data.terceros.map(t => ({
+                    id_pt: t.id_pt,
+                    servicio: t.servicio,
+                    descripcion: t.descripcion,
+                    costo: parseFloat(t.costo)
+                }));
+                renderTerceros();
+
+                // Cargar viáticos
+                dataViaticos = data.viaticos.map(v => ({
+                    id_pv: v.id_pv,
+                    descripcion: v.descripcion,
+                    costo_diario: parseFloat(v.costo_diario),
+                    personas: v.personas,
+                    dias: v.dias,
+                    total: parseFloat(v.total)
+                }));
+                renderViaticos();
+
+                // Cargar impresiones
+                dataImpresiones = data.impresiones.map(i => ({
+                    id_pi: i.id_pi,
+                    nombre: i.nombre,
+                    ancho: parseFloat(i.ancho),
+                    largo: parseFloat(i.largo),
+                    cantidad: i.cantidad,
+                    costo_m2: parseFloat(i.costo_m2),
+                    total: parseFloat(i.total)
+                }));
+                renderImpresiones();
+
+                // Mostrar formulario
+                document.getElementById('budget-form-container').classList.remove('hidden');
+
+            } catch (e) {
+                console.error(e);
+                alert('Error al cargar presupuesto: ' + e.message);
+            }
+        }
+
+        // Cargar materiales del inventario
+        async function loadMaterialesDB() {
+            try {
+                const res = await fetch(`${API_BASE}/materials`);
+                materialesDB = await res.json();
+                const select = document.getElementById('mat-select');
+                materialesDB.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id_material;
+                    opt.textContent = `${m.nombre} (${m.unidad_medida}) - S/ ${parseFloat(m.precio_unitario).toFixed(2)}`;
+                    select.appendChild(opt);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        // Cargar cargos de mano de obra
+        async function loadLaborsDB() {
+            try {
+                const res = await fetch(`${API_BASE}/labors`);
+                laborsDB = await res.json();
+                const select = document.getElementById('mo-select');
+                laborsDB.forEach(l => {
+                    const opt = document.createElement('option');
+                    opt.value = l.id_mano_obra;
+                    opt.textContent = `${l.nombre} - S/ ${parseFloat(l.costo_hora).toFixed(2)}/hr`;
+                    select.appendChild(opt);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        // Auto-rellenar costo por hora al seleccionar cargo
+        function onLaborSelect() {
+            const select = document.getElementById('mo-select');
+            const id = parseInt(select.value);
+            if (!id) {
+                document.getElementById('mo-costo-hora').value = '';
+                return;
+            }
+            const labor = laborsDB.find(l => l.id_mano_obra === id);
+            if (labor) {
+                document.getElementById('mo-costo-hora').value = parseFloat(labor.costo_hora).toFixed(2);
+            }
+        }
+
+        // Accordion
+        function toggleAccordion(section) {
+            const content = document.getElementById(`content-${section}`);
+            const icon = document.getElementById(`icon-${section}`);
+            content.classList.toggle('open');
+            icon.style.transform = content.classList.contains('open') ? 'rotate(180deg)' : '';
+        }
+
+        // ========== MATERIALES ==========
+        function agregarMaterial() {
+            const select = document.getElementById('mat-select');
+            const id = parseInt(select.value);
+            const cantidad = parseFloat(document.getElementById('mat-cantidad').value) || 1;
+            if (!id) return showWarning('Seleccione un material');
+
+            const mat = materialesDB.find(m => m.id_material === id);
+            if (!mat) return;
+
+            dataMateriales.push({
+                id_material: id,
+                nombre: mat.nombre,
+                unidad: mat.unidad_medida,
+                cantidad,
+                costo_unitario: parseFloat(mat.precio_unitario),
+                total: cantidad * parseFloat(mat.precio_unitario)
+            });
+            renderMateriales();
+            select.value = '';
+            document.getElementById('mat-cantidad').value = '';
+        }
+
+        function renderMateriales() {
+            const tbody = document.getElementById('tbody-materiales');
+            let suma = 0;
+            tbody.innerHTML = dataMateriales.map((m, i) => {
+                suma += m.total;
+                return `<tr class="border-b">
+                    <td class="px-4 py-2">${m.nombre}</td>
+                    <td class="px-4 py-2 text-center">${m.cantidad}</td>
+                    <td class="px-4 py-2 text-center">${m.unidad}</td>
+                    <td class="px-4 py-2 text-right">${m.costo_unitario.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-right">${m.total.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-center"><button onclick="eliminarMaterial(${i})" class="text-destructive hover:bg-destructive/10 p-1 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>`;
+            }).join('');
+            document.getElementById('suma-materiales').textContent = suma.toFixed(2);
+            lucide.createIcons();
+            actualizarTotalGeneral();
+        }
+
+        function eliminarMaterial(i) { dataMateriales.splice(i, 1); renderMateriales(); }
+
+        // ========== MANO DE OBRA ==========
+        function agregarManoObra() {
+            const select = document.getElementById('mo-select');
+            const id = parseInt(select.value);
+            const costo_hora = parseFloat(document.getElementById('mo-costo-hora').value) || 0;
+            const horas = parseFloat(document.getElementById('mo-horas').value) || 1;
+            const personas = parseInt(document.getElementById('mo-personas').value) || 1;
+            if (!id) return showWarning('Seleccione un cargo');
+
+            const labor = laborsDB.find(l => l.id_mano_obra === id);
+            if (!labor) return;
+
+            dataManoObra.push({
+                id_mano_obra: id,
+                cargo: labor.nombre,
+                costo_hora,
+                horas,
+                personas,
+                total: costo_hora * horas * personas
+            });
+            renderManoObra();
+            select.value = '';
+            document.getElementById('mo-costo-hora').value = '';
+            document.getElementById('mo-horas').value = '';
+            document.getElementById('mo-personas').value = '';
+        }
+
+        function renderManoObra() {
+            const tbody = document.getElementById('tbody-mano-obra');
+            let suma = 0;
+            tbody.innerHTML = dataManoObra.map((m, i) => {
+                suma += m.total;
+                return `<tr class="border-b">
+                    <td class="px-4 py-2">${m.cargo}</td>
+                    <td class="px-4 py-2 text-right">${m.costo_hora.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-center">${m.horas}</td>
+                    <td class="px-4 py-2 text-center">${m.personas}</td>
+                    <td class="px-4 py-2 text-right">${m.total.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-center"><button onclick="eliminarManoObra(${i})" class="text-destructive hover:bg-destructive/10 p-1 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>`;
+            }).join('');
+            document.getElementById('suma-mano-obra').textContent = suma.toFixed(2);
+            document.getElementById('factor-mano-obra').textContent = (suma * FACTOR_MANO_OBRA).toFixed(2);
+            lucide.createIcons();
+            actualizarTotalGeneral();
+        }
+
+        function eliminarManoObra(i) { dataManoObra.splice(i, 1); renderManoObra(); }
+
+        // ========== TERCEROS ==========
+        function agregarTercero() {
+            const servicio = document.getElementById('ter-servicio').value;
+            const descripcion = document.getElementById('ter-descripcion').value;
+            const costo = parseFloat(document.getElementById('ter-costo').value) || 0;
+            if (!servicio) return showWarning('Ingrese un servicio');
+
+            dataTerceros.push({ servicio, descripcion, costo });
+            renderTerceros();
+            document.getElementById('ter-servicio').value = '';
+            document.getElementById('ter-descripcion').value = '';
+            document.getElementById('ter-costo').value = '';
+        }
+
+        function renderTerceros() {
+            const tbody = document.getElementById('tbody-terceros');
+            let suma = 0;
+            tbody.innerHTML = dataTerceros.map((t, i) => {
+                suma += t.costo;
+                return `<tr class="border-b">
+                    <td class="px-4 py-2">${t.servicio}</td>
+                    <td class="px-4 py-2">${t.descripcion || '-'}</td>
+                    <td class="px-4 py-2 text-right">${t.costo.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-center"><button onclick="eliminarTercero(${i})" class="text-destructive hover:bg-destructive/10 p-1 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>`;
+            }).join('');
+            document.getElementById('suma-terceros').textContent = suma.toFixed(2);
+            lucide.createIcons();
+            actualizarTotalGeneral();
+        }
+
+        function eliminarTercero(i) { dataTerceros.splice(i, 1); renderTerceros(); }
+
+        // ========== VIÁTICOS ==========
+        function agregarViatico() {
+            const descripcion = document.getElementById('via-descripcion').value;
+            const costo_diario = parseFloat(document.getElementById('via-costo').value) || 0;
+            const personas = parseInt(document.getElementById('via-personas').value) || 1;
+            const dias = parseInt(document.getElementById('via-dias').value) || 1;
+            if (!descripcion) return showWarning('Ingrese una descripción');
+
+            dataViaticos.push({ descripcion, costo_diario, personas, dias, total: costo_diario * personas * dias });
+            renderViaticos();
+            document.getElementById('via-descripcion').value = '';
+            document.getElementById('via-costo').value = '';
+            document.getElementById('via-personas').value = '';
+            document.getElementById('via-dias').value = '';
+        }
+
+        function renderViaticos() {
+            const tbody = document.getElementById('tbody-viaticos');
+            let suma = 0;
+            tbody.innerHTML = dataViaticos.map((v, i) => {
+                suma += v.total;
+                return `<tr class="border-b">
+                    <td class="px-4 py-2">${v.descripcion}</td>
+                    <td class="px-4 py-2 text-right">${v.costo_diario.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-center">${v.personas}</td>
+                    <td class="px-4 py-2 text-center">${v.dias}</td>
+                    <td class="px-4 py-2 text-right">${v.total.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-center"><button onclick="eliminarViatico(${i})" class="text-destructive hover:bg-destructive/10 p-1 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>`;
+            }).join('');
+            document.getElementById('suma-viaticos').textContent = suma.toFixed(2);
+            lucide.createIcons();
+            actualizarTotalGeneral();
+        }
+
+        function eliminarViatico(i) { dataViaticos.splice(i, 1); renderViaticos(); }
+
+        // ========== IMPRESIONES ==========
+        function agregarImpresion() {
+            const nombre = document.getElementById('imp-nombre').value;
+            const ancho = parseFloat(document.getElementById('imp-ancho').value) || 1;
+            const largo = parseFloat(document.getElementById('imp-largo').value) || 1;
+            const cantidad = parseInt(document.getElementById('imp-cantidad').value) || 1;
+            const costo_m2 = parseFloat(document.getElementById('imp-costo-m2').value) || 0;
+            if (!nombre) return showWarning('Ingrese un nombre');
+
+            dataImpresiones.push({ nombre, ancho, largo, cantidad, costo_m2, total: ancho * largo * cantidad * costo_m2 });
+            renderImpresiones();
+            document.getElementById('imp-nombre').value = '';
+            document.getElementById('imp-ancho').value = '';
+            document.getElementById('imp-largo').value = '';
+            document.getElementById('imp-cantidad').value = '';
+            document.getElementById('imp-costo-m2').value = '';
+        }
+
+        function renderImpresiones() {
+            const tbody = document.getElementById('tbody-impresiones');
+            let suma = 0;
+            tbody.innerHTML = dataImpresiones.map((m, i) => {
+                suma += m.total;
+                const area = m.ancho * m.largo;
+                return `<tr class="border-b">
+                    <td class="px-4 py-2">${m.nombre}</td>
+                    <td class="px-4 py-2 text-center">${m.ancho}m x ${m.largo}m</td>
+                    <td class="px-4 py-2 text-center">${m.cantidad}</td>
+                    <td class="px-4 py-2 text-right">${(m.costo_m2 * area).toFixed(2)}</td>
+                    <td class="px-4 py-2 text-right">${m.total.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-center"><button onclick="eliminarImpresion(${i})" class="text-destructive hover:bg-destructive/10 p-1 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>`;
+            }).join('');
+            document.getElementById('suma-impresiones').textContent = suma.toFixed(2);
+            lucide.createIcons();
+            actualizarTotalGeneral();
+        }
+
+        function eliminarImpresion(i) { dataImpresiones.splice(i, 1); renderImpresiones(); }
+
+        // ========== TOTAL GENERAL ==========
+        function actualizarTotalGeneral() {
+            const mat = dataMateriales.reduce((s, m) => s + m.total, 0);
+            const mo = dataManoObra.reduce((s, m) => s + m.total, 0) * FACTOR_MANO_OBRA;
+            const ter = dataTerceros.reduce((s, t) => s + t.costo, 0);
+            const via = dataViaticos.reduce((s, v) => s + v.total, 0);
+            const imp = dataImpresiones.reduce((s, m) => s + m.total, 0);
+            const total = mat + mo + ter + via + imp;
+            document.getElementById('total-general').textContent = `S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+        }
+
+        // ========== GUARDAR (Modo Edición) ==========
+        async function guardarPresupuesto() {
+            const titulo = document.getElementById('titulo').value;
+            const descripcion_alcance = document.getElementById('descripcion').value;
+
+            try {
+                // 1. Actualizar cabecera
+                await fetch(`${API_BASE}/budgets/${currentBudgetId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ titulo, descripcion_alcance, estado: 'Borrador', factor_mano_obra: FACTOR_MANO_OBRA })
+                });
+
+                // 2. Insertar nuevos materiales (los que no tienen id_pm)
+                for (const m of dataMateriales) {
+                    if (!m.id_pm) {
+                        await fetch(`${API_BASE}/budgets/materiales`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id_presupuesto: currentBudgetId, id_material: m.id_material, cantidad: m.cantidad, costo_unitario: m.costo_unitario })
+                        });
+                    }
+                }
+
+                // 3. Insertar nueva mano de obra
+                for (const mo of dataManoObra) {
+                    if (!mo.id_pmo) {
+                        await fetch(`${API_BASE}/budgets/mano-obra`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id_presupuesto: currentBudgetId, cargo: mo.cargo, costo_hora: mo.costo_hora, horas: mo.horas, personas: mo.personas })
+                        });
+                    }
+                }
+
+                // 4. Insertar nuevos terceros
+                for (const t of dataTerceros) {
+                    if (!t.id_pt) {
+                        await fetch(`${API_BASE}/budgets/terceros`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id_presupuesto: currentBudgetId, servicio: t.servicio, descripcion: t.descripcion, costo: t.costo })
+                        });
+                    }
+                }
+
+                // 5. Insertar nuevos viáticos
+                for (const v of dataViaticos) {
+                    if (!v.id_pv) {
+                        await fetch(`${API_BASE}/budgets/viaticos`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id_presupuesto: currentBudgetId, descripcion: v.descripcion, costo_diario: v.costo_diario, personas: v.personas, dias: v.dias })
+                        });
+                    }
+                }
+
+                // 6. Insertar nuevas impresiones
+                for (const i of dataImpresiones) {
+                    if (!i.id_pi) {
+                        await fetch(`${API_BASE}/budgets/impresiones`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id_presupuesto: currentBudgetId, nombre: i.nombre, ancho: i.ancho, largo: i.largo, cantidad: i.cantidad, costo_m2: i.costo_m2 })
+                        });
+                    }
+                }
+
+                alert('¡Presupuesto actualizado correctamente!');
+                window.location.href = 'operativo-presupuestos.html';
+            } catch (e) {
+                console.error(e);
+                alert('Error al guardar: ' + e.message);
+            }
+        }
+
+        // ========== MARCAR COMO COMPLETADO ==========
+        async function marcarCompletado() {
+            if (!confirm('¿Estás seguro de marcar este presupuesto como completado?\n\nEsto guardará todos los cambios y finalizará la edición.')) {
+                return;
+            }
+
+            try {
+                // Primero guardar todos los datos
+                const titulo = document.getElementById('titulo').value;
+                const descripcion_alcance = document.getElementById('descripcion').value;
+
+                await fetch(`${API_BASE}/budgets/${currentBudgetId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ titulo, descripcion_alcance, estado: 'Borrador', factor_mano_obra: FACTOR_MANO_OBRA })
+                });
+
+                // Guardar items nuevos (solo los que no tienen ID)
+                for (const m of dataMateriales) {
+                    if (!m.id_pm) {
+                        await fetch(`${API_BASE}/budgets/materiales`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id_presupuesto: currentBudgetId, id_material: m.id_material, cantidad: m.cantidad, costo_unitario: m.costo_unitario })
+                        });
+                    }
+                }
+
+                for (const mo of dataManoObra) {
+                    if (!mo.id_pmo) {
+                        await fetch(`${API_BASE}/budgets/mano-obra`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id_presupuesto: currentBudgetId, cargo: mo.cargo, costo_hora: mo.costo_hora, horas: mo.horas, personas: mo.personas })
+                        });
+                    }
+                }
+
+                for (const t of dataTerceros) {
+                    if (!t.id_pt) {
+                        await fetch(`${API_BASE}/budgets/terceros`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id_presupuesto: currentBudgetId, servicio: t.servicio, descripcion: t.descripcion, costo: t.costo })
+                        });
+                    }
+                }
+
+                for (const v of dataViaticos) {
+                    if (!v.id_pv) {
+                        await fetch(`${API_BASE}/budgets/viaticos`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id_presupuesto: currentBudgetId, descripcion: v.descripcion, costo_diario: v.costo_diario, personas: v.personas, dias: v.dias })
+                        });
+                    }
+                }
+
+                for (const i of dataImpresiones) {
+                    if (!i.id_pi) {
+                        await fetch(`${API_BASE}/budgets/impresiones`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id_presupuesto: currentBudgetId, nombre: i.nombre, ancho: i.ancho, largo: i.largo, cantidad: i.cantidad, costo_m2: i.costo_m2 })
+                        });
+                    }
+                }
+
+                // Finalmente marcar como completado
+                const completeRes = await fetch(`${API_BASE}/budgets/${currentBudgetId}/complete`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!completeRes.ok) {
+                    throw new Error('Error al marcar como completado');
+                }
+
+                alert('✓ ¡Presupuesto marcado como COMPLETADO!\n\nEl administrador ahora podrá ver el presupuesto finalizado.');
+                window.location.href = 'operativo-presupuestos.html';
+            } catch (e) {
+                console.error(e);
+                alert('Error: ' + e.message);
+            }
+        }
+    </script>
+</body>
+
+</html>

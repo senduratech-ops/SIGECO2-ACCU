@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - SIGECO-ACCU</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="tailwind-config.js"></script>
+    <script src="config.js"></script>
+</head>
+
+<body class="min-h-screen bg-muted/20 flex flex-col items-center justify-center p-4">
+
+    <!-- Background Elements -->
+    <div
+        class="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background">
+    </div>
+
+    <div class="w-full max-w-md space-y-8">
+        <!-- Logo/Header -->
+        <div class="flex flex-col items-center text-center">
+            <div
+                class="h-12 w-12 flex items-center justify-center bg-primary rounded-xl text-primary-foreground font-bold shadow-lg mb-4">
+                S
+            </div>
+            <h2 class="text-2xl font-bold tracking-tight">Bienvenido de nuevo</h2>
+            <p class="text-sm text-muted-foreground mt-2" id="role-text">
+                Ingresa tus credenciales para acceder al sistema
+            </p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-card text-card-foreground border rounded-xl shadow-lg p-6 sm:p-8">
+            <form id="login-form" class="space-y-6">
+                <div class="space-y-2">
+                    <label for="email"
+                        class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Correo
+                        Electrónico</label>
+                    <input type="email" id="email" required
+                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        placeholder="usuario@accu.com">
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label for="password"
+                            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Contraseña</label>
+                        <a href="#" class="text-sm font-medium text-primary hover:underline">¿Olvidaste tu
+                            contraseña?</a>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="password" required
+                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10"
+                            placeholder="••••••••">
+                        <button type="button"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full shadow-sm">
+                    Ingresar al Sistema
+                </button>
+            </form>
+
+
+        </div>
+
+        <p class="px-8 text-center text-sm text-muted-foreground">
+            <a href="index.html" class="hover:text-primary underline underline-offset-4">
+                <i data-lucide="arrow-left" class="inline w-3 h-3 mr-1"></i> Volver al inicio
+            </a>
+        </p>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Obtener rol desde la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role');
+        const roleText = document.getElementById('role-text');
+
+        // Map de dashboards
+        const dashboards = {
+            'admin': { file: 'dashboard-admin.html', label: 'Administrativo' },
+            'jefe': { file: 'dashboard-jefe.html', label: 'Jefe de Proyecto' },
+            'operativo': { file: 'dashboard-operativo.html', label: 'Operativo' }
+        };
+
+        // Mostrar texto y pre-fill de email
+        if (role && dashboards[role]) {
+            roleText.innerHTML = `Accediendo al módulo <span class="font-semibold text-primary">${dashboards[role].label}</span>`;
+            if (role === 'admin') document.getElementById('email').value = 'admin@accu.com';
+            if (role === 'jefe') document.getElementById('email').value = 'jefe@accu.com';
+            if (role === 'operativo') document.getElementById('email').value = 'operativo@accu.com';
+        }
+
+        console.log('Rol seleccionado:', role);
+
+        // Manejo del login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+
+            // Mostrar loading
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin mr-2"></i> Verificando...';
+            lucide.createIcons();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Fetch dinámico según rol
+                const res = await fetch(`${API_BASE}/login/${role}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                    credentials: 'include'
+                });
+
+                if (!res.ok) {
+                    alert('Credenciales inválidas o rol no autorizado');
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                    return;
+                }
+
+                const data = await res.json();
+
+                // Redirigir al dashboard correcto
+                if (data.role && dashboards[data.role]) {
+                    window.location.href = dashboards[data.role].file;
+                } else {
+                    alert('Rol no reconocido');
+                    window.location.href = 'index.html';
+                }
+            } catch (err) {
+                console.error('Error en login:', err);
+                alert('Error de conexión con el servidor');
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        });
+    </script>
+
+</body>
+
+</html>

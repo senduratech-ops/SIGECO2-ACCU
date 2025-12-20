@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte - ACCUBoss</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .shadow-sm,
+            .shadow-md,
+            .shadow-lg {
+                box-shadow: none !important;
+            }
+
+            .border {
+                border: 1px solid #ddd !important;
+            }
+        }
+    </style>
+    <script src="config.js"></script>
+</head>
+
+<body class="bg-gray-50 p-8 min-h-screen text-gray-900">
+
+    <div class="max-w-5xl mx-auto bg-white p-10 shadow-lg rounded-lg print:shadow-none print:p-0 print:max-w-none">
+        <!-- Header -->
+        <div class="flex justify-between items-start mb-8 border-b pb-6">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-gray-900">ACCU - Reporte Operativo</h1>
+                <p class="text-gray-500 mt-1">Generado automáticamente por el sistema</p>
+            </div>
+            <div class="text-right">
+                <p class="text-sm font-semibold text-gray-900" id="report-date">Fecha: --/--/----</p>
+                <p class="text-sm text-gray-500" id="report-type">Tipo: --</p>
+            </div>
+        </div>
+
+        <!-- Toolbar (No Print) -->
+        <div class="no-print mb-6 flex gap-4">
+            <button onclick="window.print()"
+                class="bg-black text-white px-4 py-2 rounded font-medium hover:bg-gray-800 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                Imprimir / Guardar PDF
+            </button>
+            <button onclick="window.close()"
+                class="bg-gray-200 text-gray-800 px-4 py-2 rounded font-medium hover:bg-gray-300">
+                Cerrar
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div id="report-content">
+            <p class="text-center text-gray-500 py-10">Cargando datos...</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-12 pt-6 border-t text-center text-xs text-gray-400">
+            <p>ACCU - Sistema de Gestión Operativa</p>
+            <p>Documento confidencial - Uso interno exclusivo</p>
+        </div>
+    </div>
+
+    <script>
+        // API_BASE comes from config.js
+        const params = new URLSearchParams(window.location.search);
+        const type = params.get('type');
+        const titleMap = {
+            'presupuestos': 'Reporte General de Presupuestos',
+            'materiales': 'Inventario General de Materiales',
+            'mano_obra': 'Listado de Cargos y Costos (Mano de Obra)',
+            'proyectos': 'Estado de Proyectos Activos',
+            'costos': 'Análisis de Distribución de Costos'
+        };
+
+        document.getElementById('report-date').textContent = new Date().toLocaleDateString('es-PE', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        document.getElementById('report-type').textContent = `Tipo: ${type ? type.toUpperCase() : 'GENERAL'}`;
+        document.querySelector('h1').textContent = titleMap[type] || 'Reporte del Sistema';
+
+        async function loadData() {
+            const container = document.getElementById('report-content');
+            try {
+                let data, html;
+
+                switch (type) {
+                    case 'presupuestos':
+                        data = await fetch(`${API_BASE}/budgets/all`).then(r => r.json());
+                        html = generateTable(data, [
+                            { head: 'ID', key: 'id_presupuesto' },
+                            { head: 'Título', key: 'titulo' },
+                            { head: 'Proyecto', key: 'proyecto_nombre' },
+                            { head: 'Estado', key: 'estado', badge: true },
+                            { head: 'Fecha', key: 'fecha_creacion', date: true },
+                            { head: 'Total (Est)', key: 'total_general', money: true }
+                        ]);
+                        break;
+
+                    case 'materiales':
+                        data = await fetch(`${API_BASE}/materials`).then(r => r.json());
+                        html = generateTable(data, [
+                            { head: 'Material', key: 'nombre' },
+                            { head: 'Tipo', key: 'tipo' },
+                            { head: 'Unidad', key: 'unidad_medida' },
+                            { head: 'Stock', key: 'stock_actual' },
+                            { head: 'Precio Unit.', key: 'precio_unitario', money: true },
+                            { head: 'Valor Stock', val: (r) => (r.stock_actual * r.precio_unitario), money: true }
+                        ]);
+                        break;
+
+                    case 'mano_obra':
+                        data = await fetch(`${API_BASE}/labors`).then(r => r.json());
+                        html = generateTable(data, [
+                            { head: 'Cargo', key: 'nombre' },
+                            { head: 'Descripción', key: 'descripcion' },
+                            { head: 'Costo Hora', key: 'costo_hora', money: true },
+                            { head: 'Estado', key: 'activo', bool: true }
+                        ]);
+                        break;
+
+                    case 'proyectos':
+                        data = await fetch(`${API_BASE}/projects`).then(r => r.json());
+                        html = generateTable(data, [
+                            { head: 'Proyecto', key: 'nombre' },
+                            { head: 'Cliente', key: 'cliente' },
+                            { head: 'Ubicación', key: 'ubicacion' },
+                            { head: 'Estado', key: 'estado', badge: true },
+                            { head: 'Fecha Inicio', key: 'fecha_inicio', date: true }
+                        ]);
+                        break;
+
+                    case 'costos':
+                        data = await fetch(`${API_BASE}/budgets/operativo-stats`).then(r => r.json());
+                        const d = data.costDistribution;
+                        const total = parseFloat(d.total_materiales) + parseFloat(d.total_mano_obra) + parseFloat(d.total_otros);
+
+                        html = `
+                            <div class="grid grid-cols-2 gap-8 mb-8">
+                                <div class="bg-gray-600/5 p-6 rounded-lg">
+                                    <h3 class="text-xl font-bold mb-4 border-b pb-2">Resumen General</h3>
+                                    <div class="flex justify-between py-2 border-b border-dashed"><span>Materiales</span> <span class="font-mono">${formatMoney(d.total_materiales)}</span></div>
+                                    <div class="flex justify-between py-2 border-b border-dashed"><span>Mano de Obra</span> <span class="font-mono">${formatMoney(d.total_mano_obra)}</span></div>
+                                    <div class="flex justify-between py-2 border-b border-dashed"><span>Otros (Terceros/Viáticos)</span> <span class="font-mono">${formatMoney(d.total_otros)}</span></div>
+                                    <div class="flex justify-between py-4 text-lg font-bold"><span>TOTAL ACUMULADO</span> <span>${formatMoney(total)}</span></div>
+                                </div>
+                                <div>
+                                    <!-- Simple CSS Chart -->
+                                    <h3 class="text-lg font-bold mb-4">Distribución Porcentual</h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1"><span>Materiales</span> <span>${((d.total_materiales / total) * 100).toFixed(1)}%</span></div>
+                                            <div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-blue-600 h-4 rounded-full" style="width: ${((d.total_materiales / total) * 100)}%"></div></div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1"><span>Mano de Obra</span> <span>${((d.total_mano_obra / total) * 100).toFixed(1)}%</span></div>
+                                            <div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-green-600 h-4 rounded-full" style="width: ${((d.total_mano_obra / total) * 100)}%"></div></div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1"><span>Otros</span> <span>${((d.total_otros / total) * 100).toFixed(1)}%</span></div>
+                                            <div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-orange-600 h-4 rounded-full" style="width: ${((d.total_otros / total) * 100)}%"></div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        break;
+
+                    default:
+                        html = `<p class="text-red-500 text-center">Tipo de reporte no válido</p>`;
+                }
+
+                container.innerHTML = html;
+
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = `<p class="text-red-500 text-center py-4">Error cargando datos: ${e.message}</p>`;
+            }
+        }
+
+        function generateTable(data, columns) {
+            if (!data || data.length === 0) return '<p class="text-center py-4 text-gray-500">No hay datos para mostrar</p>';
+
+            let rows = data.map(row => {
+                let cells = columns.map(col => {
+                    let val = col.val ? col.val(row) : row[col.key];
+                    if (col.money) val = formatMoney(val);
+                    if (col.date) val = new Date(val).toLocaleDateString();
+                    if (col.bool) val = val ? 'Activo' : 'Inactivo';
+                    if (col.badge) val = `<span class="px-2 py-0.5 rounded text-xs border border-gray-300 bg-gray-100">${val}</span>`;
+                    return `<td class="py-3 px-4 border-b text-sm">${val || '-'}</td>`;
+                }).join('');
+                return `<tr>${cells}</tr>`;
+            }).join('');
+
+            let headers = columns.map(col => `<th class="text-left py-3 px-4 bg-gray-100 font-semibold border-b text-xs uppercase tracking-wider text-gray-600">${col.head}</th>`).join('');
+
+            return `
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead><tr>${headers}</tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+                <div class="mt-4 text-right text-xs text-gray-400">Total registros: ${data.length}</div>
+            `;
+        }
+
+        function formatMoney(amount) {
+            return parseFloat(amount || 0).toLocaleString('es-PE', { style: 'currency', currency: 'PEN' });
+        }
+
+        loadData();
+    </script>
+</body>
+
+</html>

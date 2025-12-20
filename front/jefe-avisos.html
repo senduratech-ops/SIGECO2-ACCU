@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avisos - ACCUBoss</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="tailwind-config.js"></script>
+    <style>
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-btn.active {
+            background-color: white;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            color: black;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-foreground">
+
+    <div class="min-h-screen flex w-full">
+        <!-- Sidebar -->
+        <aside id="app-sidebar"
+            class="relative transition-[width] duration-300 hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-primary text-primary-foreground">
+            <div class="h-16 flex items-center px-6 border-b border-primary-foreground/10">
+                <span
+                    class="text-3xl font-extrabold tracking-tight sidebar-title overflow-hidden whitespace-nowrap">ACCU</span>
+            </div>
+            <!-- Toggle Button -->
+            <button id="sidebar-toggle" onclick="toggleSidebar()"
+                class="absolute -right-3 top-20 h-6 w-6 rounded-full bg-accent text-accent-foreground hover:bg-accent/80 shadow-md flex items-center justify-center transition-colors z-50 cursor-pointer border border-border">
+                <i data-lucide="chevron-left" class="h-4 w-4"></i>
+            </button>
+            <div class="flex-1 py-4 flex flex-col gap-1 px-3">
+                <div class="px-3 mb-2 text-xs font-semibold text-primary-foreground/70 uppercase tracking-wider">Menú
+                    Principal</div>
+                <a href="dashboard-jefe.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Dashboard
+                    </span></a>
+                <a href="jefe-proyectos.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="folder-kanban" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Proyectos
+                    </span></a>
+                <a href="jefe-presupuestos.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="calculator" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Presupuestos
+                    </span></a>
+                <a href="jefe-equipo.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="users" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Equipo
+                    </span></a>
+                <a href="jefe-avisos.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg bg-accent text-accent-foreground font-medium">
+                    <i data-lucide="bell" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Avisos
+                    </span></a>
+
+                <div class="mt-auto pt-4 border-t border-primary-foreground/10">
+                    <a href="index.html"
+                        class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-destructive-foreground hover:bg-destructive/20">
+                        <i data-lucide="log-out" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                            Cerrar Sesión
+                        </span></a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <header
+                class="h-16 bg-card border-b border-border flex items-center justify-between px-6 gap-4 sticky top-0 z-10">
+                <div class="relative flex-1 max-w-md hidden md:flex">
+                    <i data-lucide="search"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"></i>
+                    <input type="text" placeholder="Buscar avisos..."
+                        class="flex h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pl-10 border-0">
+                </div>
+                <!-- Mobile Menu Button -->
+                <button class="lg:hidden p-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+
+                <div class="flex items-center gap-4 ml-auto lg:ml-0">
+                    <!-- Notifications Dropdown -->
+                    <div class="relative">
+                        <button id="notifications-btn" onclick="toggleNotificationsDropdown()"
+                            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 relative">
+                            <i data-lucide="bell" class="h-5 w-5"></i>
+                            <span id="notifications-badge"
+                                class="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center hidden">0</span>
+                        </button>
+                        <div id="notifications-dropdown"
+                            style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; width: 360px; background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #e5e7eb; z-index: 50; max-height: 400px; overflow: hidden;">
+                            <div class="p-3 border-b flex justify-between items-center">
+                                <span class="font-semibold text-sm">Notificaciones</span>
+                                <button onclick="markAllReadFromDropdown()"
+                                    class="text-xs text-blue-600 hover:underline">Marcar todo leído</button>
+                            </div>
+                            <div id="notifications-list" class="max-h-80 overflow-y-auto">
+                                <div class="p-4 text-center text-gray-500 text-sm">Cargando...</div>
+                            </div>
+                            <div class="p-2 border-t text-center">
+                                <a href="jefe-avisos.html" class="text-xs text-blue-600 hover:underline">Ver todas las
+                                    notificaciones</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Profile Dropdown -->
+                    <div class="relative">
+                        <button id="user-menu-btn" onclick="toggleUserMenu()"
+                            class="inline-flex items-center gap-2 hover:bg-accent hover:text-accent-foreground p-2 rounded-md transition-colors">
+                            <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                                <span id="user-initials"
+                                    class="flex h-full w-full items-center justify-center rounded-full bg-primary text-primary-foreground font-medium">--</span>
+                            </span>
+                            <span id="user-short-name" class="hidden md:inline text-sm font-medium">Cargando...</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 hidden md:block"></i>
+                        </button>
+                        <div id="user-menu-dropdown"
+                            style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; width: 240px; background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #e5e7eb; z-index: 50;">
+                            <div class="p-4 border-b">
+                                <p id="user-full-name" class="font-semibold">Cargando...</p>
+                                <p id="user-email" class="text-sm text-gray-500">--</p>
+                                <span id="user-role-badge"
+                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 mt-2">--</span>
+                            </div>
+                            <div class="p-2">
+                                <a href="index.html"
+                                    class="flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md">
+                                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                                    Cerrar Sesión
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 p-6 lg:p-8 overflow-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold">Avisos</h1>
+                        <p class="text-muted-foreground">Gestión de notificaciones y alertas del sistema</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="markAllRead()"
+                            class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-input bg-background hover:bg-accent h-10 px-4 py-2 gap-2">
+                            <i data-lucide="check-check" class="w-4 h-4"></i>
+                            Marcar todo leído
+                        </button>
+                        <button onclick="openCreateModal()"
+                            class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 gap-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            Crear Aviso
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div
+                        class="inline-flex h-10 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-fit">
+                        <button data-tab="todos" onclick="switchTab('todos')"
+                            class="tab-btn active inline-flex items-center justify-center rounded-sm px-3 py-1.5 text-sm font-medium">Todos</button>
+                        <button data-tab="no-leidos" onclick="switchTab('no-leidos')"
+                            class="tab-btn inline-flex items-center justify-center rounded-sm px-3 py-1.5 text-sm font-medium hover:bg-background/50">No
+                            leídos</button>
+                        <button data-tab="alertas" onclick="switchTab('alertas')"
+                            class="tab-btn inline-flex items-center justify-center rounded-sm px-3 py-1.5 text-sm font-medium hover:bg-background/50">Alertas</button>
+                    </div>
+
+                    <!-- Loading -->
+                    <div id="loading-state" class="flex justify-center py-8">
+                        <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-muted-foreground"></i>
+                    </div>
+
+                    <!-- Avisos List -->
+                    <div id="avisos-list" class="space-y-3 hidden"></div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="hidden text-center py-12">
+                        <i data-lucide="bell-off" class="w-12 h-12 mx-auto text-muted-foreground mb-4"></i>
+                        <h3 class="text-lg font-semibold mb-2">No hay avisos</h3>
+                        <p class="text-muted-foreground">No tienes notificaciones en este momento</p>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Nuevo Aviso -->
+    <div id="aviso-modal" class="hidden fixed inset-0 z-50 bg-black/80 items-center justify-center p-4">
+        <div class="bg-card text-card-foreground p-6 rounded-lg w-full max-w-md shadow-lg border border-border">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Crear Nuevo Aviso</h3>
+                <button onclick="closeModal()" class="text-muted-foreground hover:text-foreground">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="aviso-form" class="space-y-4">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Mensaje *</label>
+                    <textarea id="aviso-msg" required rows="3"
+                        class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        placeholder="Escriba el mensaje del aviso..."></textarea>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Tipo</label>
+                    <select id="aviso-type"
+                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        <option value="info">Información</option>
+                        <option value="alerta">Alerta</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="exito">Éxito</option>
+                    </select>
+                </div>
+                <div class="pt-4 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal()"
+                        class="px-4 py-2 border border-input rounded-md hover:bg-accent">Cancelar</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="header-common.js"></script>
+    <script src="config.js"></script>`n    <script src="script.js"></script>
+    <script>
+        // API_BASE is already defined in script.js
+        let allNotifications = [];
+        let currentTab = 'todos';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            loadNotifications();
+            loadHeaderNotifications();
+            document.getElementById('aviso-form').addEventListener('submit', handleSubmit);
+        });
+
+        async function loadNotifications() {
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('avisos-list').classList.add('hidden');
+            document.getElementById('empty-state').classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE}/notifications`);
+                allNotifications = await response.json();
+                filterAndRender();
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                // Mostrar datos de ejemplo si falla
+                allNotifications = [
+                    { id_notificacion: 1, mensaje: 'Nuevo documento agregado al proyecto Mall Centro Comercial', tipo: 'info', leido: false, fecha: new Date().toISOString() },
+                    { id_notificacion: 2, mensaje: 'Presupuesto pendiente de aprobación', tipo: 'pendiente', leido: false, fecha: new Date().toISOString() },
+                    { id_notificacion: 3, mensaje: 'Plazo de entrega próximo a vencer', tipo: 'alerta', leido: true, fecha: new Date().toISOString() }
+                ];
+                filterAndRender();
+            } finally {
+                document.getElementById('loading-state').classList.add('hidden');
+            }
+        }
+
+        function filterAndRender() {
+            let filtered = allNotifications;
+
+            if (currentTab === 'no-leidos') {
+                filtered = allNotifications.filter(n => !n.leido);
+            } else if (currentTab === 'alertas') {
+                filtered = allNotifications.filter(n => n.tipo === 'alerta');
+            }
+
+            renderNotifications(filtered);
+        }
+
+        function renderNotifications(notifications) {
+            const list = document.getElementById('avisos-list');
+            const empty = document.getElementById('empty-state');
+
+            if (!notifications || notifications.length === 0) {
+                list.classList.add('hidden');
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            list.classList.remove('hidden');
+            empty.classList.add('hidden');
+
+            const typeIcons = {
+                'info': { icon: 'info', color: 'bg-blue-100 text-blue-600' },
+                'alerta': { icon: 'alert-triangle', color: 'bg-red-100 text-red-600' },
+                'pendiente': { icon: 'clock', color: 'bg-yellow-100 text-yellow-600' },
+                'exito': { icon: 'check-circle', color: 'bg-green-100 text-green-600' }
+            };
+
+            list.innerHTML = notifications.map(n => {
+                const config = typeIcons[n.tipo] || typeIcons.info;
+                return `
+                    <div class="rounded-lg border bg-card p-4 shadow-sm ${!n.leido ? 'border-l-4 border-l-blue-500' : ''}">
+                        <div class="flex items-start gap-4">
+                            <div class="p-2 rounded-full ${config.color}">
+                                <i data-lucide="${config.icon}" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm ${!n.leido ? 'font-semibold' : ''}">${n.mensaje}</p>
+                                <div class="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                                    <span><i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>${formatDate(n.fecha)}</span>
+                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs capitalize">${n.tipo}</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-1">
+                                ${!n.leido ? `
+                                    <button onclick="markAsRead(${n.id_notificacion})" class="p-2 hover:bg-accent rounded" title="Marcar como leído">
+                                        <i data-lucide="check" class="w-4 h-4"></i>
+                                    </button>
+                                ` : ''}
+                                <button onclick="deleteNotification(${n.id_notificacion})" class="p-2 hover:bg-destructive/20 rounded text-destructive" title="Eliminar">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.tab === tab) btn.classList.add('active');
+            });
+            filterAndRender();
+        }
+
+        async function markAsRead(id) {
+            try {
+                await fetch(`${API_BASE}/notifications/${id}/read`, { method: 'PUT' });
+                loadNotifications();
+                loadHeaderNotifications();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function markAllRead() {
+            try {
+                await fetch(`${API_BASE}/notifications/read-all`, { method: 'PUT' });
+                loadNotifications();
+                loadHeaderNotifications();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function deleteNotification(id) {
+            if (!confirm('¿Eliminar esta notificación?')) return;
+            try {
+                await fetch(`${API_BASE}/notifications/${id}`, { method: 'DELETE' });
+                loadNotifications();
+                loadHeaderNotifications();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function openCreateModal() {
+            document.getElementById('aviso-form').reset();
+            document.getElementById('aviso-modal').classList.remove('hidden');
+            document.getElementById('aviso-modal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('aviso-modal').classList.add('hidden');
+            document.getElementById('aviso-modal').classList.remove('flex');
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            const data = {
+                mensaje: document.getElementById('aviso-msg').value,
+                tipo: document.getElementById('aviso-type').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/notifications`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    closeModal();
+                    loadNotifications();
+                    loadHeaderNotifications();
+                } else {
+                    alert('Error al crear el aviso');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al crear el aviso');
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Ahora';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+
+            if (diffMins < 1) return 'Ahora';
+            if (diffMins < 60) return `Hace ${diffMins} min`;
+            if (diffMins < 1440) return `Hace ${Math.floor(diffMins / 60)} horas`;
+            return date.toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
+        }
+
+        // ===== HEADER NOTIFICATIONS DROPDOWN =====
+        function toggleNotificationsDropdown() {
+            const dropdown = document.getElementById('notifications-dropdown');
+            const userDropdown = document.getElementById('user-menu-dropdown');
+            userDropdown.style.display = 'none';
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function loadHeaderNotifications() {
+            try {
+                const response = await fetch(`${API_BASE}/notifications`);
+                const notifications = await response.json();
+                const unreadCount = notifications.filter(n => !n.leido).length;
+
+                const badge = document.getElementById('notifications-badge');
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+
+                const listContainer = document.getElementById('notifications-list');
+                if (notifications.length === 0) {
+                    listContainer.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">No hay notificaciones</div>';
+                    return;
+                }
+
+                const recentNotifications = notifications.slice(0, 5);
+                listContainer.innerHTML = recentNotifications.map(n => {
+                    const typeColors = {
+                        'info': 'bg-blue-500',
+                        'alerta': 'bg-red-500',
+                        'pendiente': 'bg-yellow-500',
+                        'exito': 'bg-green-500'
+                    };
+                    const dotColor = typeColors[n.tipo] || 'bg-gray-500';
+                    return `
+                        <div class="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0 ${!n.leido ? 'bg-blue-50' : ''}">
+                            <div class="flex items-start gap-3">
+                                <div class="w-2 h-2 rounded-full ${dotColor} mt-2 flex-shrink-0"></div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm ${!n.leido ? 'font-semibold' : 'text-gray-600'} truncate">${n.mensaje}</p>
+                                    <p class="text-xs text-gray-400 mt-1">${formatDate(n.fecha)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading header notifications:', error);
+                document.getElementById('notifications-list').innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">Error al cargar</div>';
+            }
+        }
+
+        async function markAllReadFromDropdown() {
+            await markAllRead();
+        }
+
+        // ===== USER MENU FUNCTIONALITY =====
+        // Note: HEADER_API is already defined in header-common.js
+
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('user-menu-dropdown');
+            const notifDropdown = document.getElementById('notifications-dropdown');
+            notifDropdown.style.display = 'none';
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function loadCurrentUser() {
+            try {
+                const response = await fetch(`${HEADER_API}/api/users/me`, { credentials: 'include' });
+                const user = await response.json();
+                const initials = (user.nombre?.charAt(0) || 'A') + (user.apellido?.charAt(0) || 'D');
+                document.getElementById('user-initials').textContent = initials.toUpperCase();
+                document.getElementById('user-short-name').textContent = user.nombre || 'Usuario';
+                document.getElementById('user-full-name').textContent = `${user.nombre || ''} ${user.apellido || ''}`.trim();
+                document.getElementById('user-email').textContent = user.correo || '';
+                const rolLabels = { 'admin': 'Administrador', 'jefe': 'Jefe de Proyecto', 'operativo': 'Operativo' };
+                document.getElementById('user-role-badge').textContent = rolLabels[user.rol] || user.rol || 'Usuario';
+            } catch (e) { console.error('Error loading user:', e); }
+        }
+
+        document.addEventListener('click', function (e) {
+            const userDropdown = document.getElementById('user-menu-dropdown');
+            const userBtn = document.getElementById('user-menu-btn');
+            const notifDropdown = document.getElementById('notifications-dropdown');
+            const notifBtn = document.getElementById('notifications-btn');
+
+            if (userDropdown && userBtn && !userDropdown.contains(e.target) && !userBtn.contains(e.target)) {
+                userDropdown.style.display = 'none';
+            }
+            if (notifDropdown && notifBtn && !notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+                notifDropdown.style.display = 'none';
+            }
+        });
+
+        loadCurrentUser();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presupuestos - Operativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="tailwind-config.js"></script>
+</head>
+
+<body class="bg-background text-foreground">
+
+    <div class="min-h-screen flex w-full">
+        <!-- Sidebar -->
+        <aside id="app-sidebar"
+            class="relative transition-[width] duration-300 hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-primary text-primary-foreground">
+            <div class="h-16 flex items-center px-6 border-b border-primary-foreground/10">
+                <span
+                    class="text-3xl font-extrabold tracking-tight sidebar-title overflow-hidden whitespace-nowrap">ACCU</span>
+            </div>
+            <!-- Toggle Button -->
+            <button id="sidebar-toggle" onclick="toggleSidebar()"
+                class="absolute -right-3 top-20 h-6 w-6 rounded-full bg-accent text-accent-foreground hover:bg-accent/80 shadow-md flex items-center justify-center transition-colors z-50 cursor-pointer border border-border">
+                <i data-lucide="chevron-left" class="h-4 w-4"></i>
+            </button>
+            <div class="flex-1 py-4 flex flex-col gap-1 px-3">
+                <div class="px-3 mb-2 text-xs font-semibold text-primary-foreground/70 uppercase tracking-wider">Menú
+                    Principal</div>
+                <a href="dashboard-operativo.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Dashboard
+                    </span></a>
+                <a href="operativo-presupuestos.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg bg-accent text-accent-foreground font-medium">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Presupuestos
+                    </span></a>
+                <a href="operativo-materiales.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="package" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Materiales
+                    </span></a>
+                <a href="operativo-mano-obra.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="hammer" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Mano de Obra
+                    </span></a>
+                <a href="operativo-reportes.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10 ">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                        Reportes
+                    </span></a>
+
+                <div class="mt-auto pt-4 border-t border-primary-foreground/10">
+                    <a href="index.html"
+                        class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-destructive-foreground hover:bg-destructive/20">
+                        <i data-lucide="log-out" class="w-4 h-4"></i><span class="sidebar-text truncate">
+                            Cerrar Sesión
+                        </span></a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <header
+                class="h-16 bg-card border-b border-border flex items-center justify-between px-6 gap-4 sticky top-0 z-10">
+                <div class="relative flex-1 max-w-md hidden md:flex">
+                </div>
+
+                <div class="flex items-center gap-4 ml-auto lg:ml-0">
+                    <!-- Notification Bell with Dropdown -->
+                    <div class="relative">
+                        <button id="notification-btn" onclick="toggleNotifications()"
+                            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 relative">
+                            <i data-lucide="bell" class="h-5 w-5"></i>
+                            <span id="notification-count"
+                                class="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center"
+                                style="display:none">0</span>
+                        </button>
+                        <!-- Dropdown -->
+                        <div id="notification-dropdown"
+                            style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; width: 320px; background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #e5e7eb; z-index: 50;">
+                            <div class="p-3 border-b flex items-center justify-between">
+                                <h4 class="font-semibold">Notificaciones</h4>
+                            </div>
+                            <div id="notification-list" class="max-h-80 overflow-y-auto">
+                                <!-- Notifications loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Profile Dropdown -->
+                    <div class="relative">
+                        <button id="user-menu-btn" onclick="toggleUserMenu()"
+                            class="inline-flex items-center gap-2 hover:bg-accent hover:text-accent-foreground p-2 rounded-md transition-colors">
+                            <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                                <span id="user-initials"
+                                    class="flex h-full w-full items-center justify-center rounded-full bg-primary text-primary-foreground font-medium">
+                                    --
+                                </span>
+                            </span>
+                            <span id="user-short-name" class="hidden md:inline text-sm font-medium">Cargando...</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 hidden md:block"></i>
+                        </button>
+                        <!-- User Dropdown -->
+                        <div id="user-menu-dropdown"
+                            style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; width: 240px; background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #e5e7eb; z-index: 50;">
+                            <div class="p-4 border-b">
+                                <p id="user-full-name" class="font-semibold">Cargando...</p>
+                                <p id="user-email" class="text-sm text-gray-500">--</p>
+                                <span id="user-role-badge"
+                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 mt-2">--</span>
+                            </div>
+                            <div class="p-2">
+                                <a href="index.html"
+                                    class="flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md">
+                                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                                    Cerrar Sesión
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 p-6 lg:p-8 overflow-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold tracking-tight text-foreground">Gestión de Presupuestos</h1>
+                        <p class="text-muted-foreground mt-1">Estimación de costos por proyecto</p>
+                    </div>
+
+                    <a href="nuevo-presupuesto.html" id="btn-create-budget"
+                        class="hidden inline-flex items-center justify-center rounded-lg text-sm font-medium bg-black text-primary-foreground h-10 px-4 py-2 gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Nuevo Presupuesto
+                    </a>
+                </div>
+
+                <!-- Selector de Proyecto -->
+                <div class="mb-6 p-4 bg-card rounded-lg border border-border shadow-sm">
+                    <label class="block text-sm font-medium mb-2">Seleccionar Proyecto</label>
+                    <select id="project-select" onchange="loadBudgets(this.value)"
+                        class="flex h-10 w-full md:w-1/2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                        <option value="">-- Seleccione un Proyecto --</option>
+                    </select>
+                </div>
+
+                <!-- Lista de Presupuestos (Cards) -->
+                <div id="budgets-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Injected -->
+                </div>
+
+                <!-- Detalle de Presupuesto - 5 Secciones -->
+                <div id="budget-detail" class="hidden space-y-4">
+                    <div class="flex justify-between items-center border-b pb-4">
+                        <div>
+                            <h2 class="text-2xl font-bold" id="budget-detail-title">Presupuesto #</h2>
+                            <p class="text-muted-foreground" id="budget-detail-desc"></p>
+                            <span class="text-sm text-muted-foreground" id="budget-detail-status">Estado:
+                                Borrador</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-muted-foreground">Total Estimado</div>
+                            <div class="text-3xl font-bold text-primary" id="budget-total">S/ 0.00</div>
+                        </div>
+                    </div>
+
+                    <!-- Documento de Solicitud Preview -->
+                    <div id="doc-solicitud-preview" class="hidden"></div>
+
+                    <!-- MATERIALES -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="bg-amber-100 px-4 py-3 font-bold text-lg flex justify-between items-center cursor-pointer"
+                            onclick="toggleSection('materiales')">
+                            MATERIALES <i data-lucide="chevron-down" id="icon-sec-materiales" class="w-5 h-5"></i>
+                        </div>
+                        <div id="sec-materiales" class="bg-white p-4 hidden">
+                            <table class="w-full text-sm">
+                                <thead class="bg-slate-800 text-white">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Nombre</th>
+                                        <th class="px-4 py-2 text-center">Cantidad</th>
+                                        <th class="px-4 py-2 text-center">Unidad</th>
+                                        <th class="px-4 py-2 text-right">Costo U.</th>
+                                        <th class="px-4 py-2 text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="view-materiales"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-view-materiales" class="px-4 py-2 text-right">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- MANO DE OBRA -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="bg-gray-200 px-4 py-3 font-bold text-lg flex justify-between items-center cursor-pointer"
+                            onclick="toggleSection('mano-obra')">
+                            MANO DE OBRA <i data-lucide="chevron-down" id="icon-sec-mano-obra" class="w-5 h-5"></i>
+                        </div>
+                        <div id="sec-mano-obra" class="bg-white p-4 hidden">
+                            <table class="w-full text-sm">
+                                <thead class="bg-slate-800 text-white">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Cargo</th>
+                                        <th class="px-4 py-2 text-right">Costo/Hora</th>
+                                        <th class="px-4 py-2 text-center">Horas</th>
+                                        <th class="px-4 py-2 text-center">Personas</th>
+                                        <th class="px-4 py-2 text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="view-mano-obra"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-view-mano-obra" class="px-4 py-2 text-right">0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Factor (1.1)</td>
+                                        <td id="factor-view-mano-obra" class="px-4 py-2 text-right">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TERCEROS -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="bg-gray-200 px-4 py-3 font-bold text-lg flex justify-between items-center cursor-pointer"
+                            onclick="toggleSection('terceros')">
+                            TERCEROS <i data-lucide="chevron-down" id="icon-sec-terceros" class="w-5 h-5"></i>
+                        </div>
+                        <div id="sec-terceros" class="bg-white p-4 hidden">
+                            <table class="w-full text-sm">
+                                <thead class="bg-slate-800 text-white">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Servicio</th>
+                                        <th class="px-4 py-2 text-left">Descripción</th>
+                                        <th class="px-4 py-2 text-right">Costo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="view-terceros"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="2" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-view-terceros" class="px-4 py-2 text-right">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- VIÁTICOS -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="bg-amber-50 px-4 py-3 font-bold text-lg flex justify-between items-center cursor-pointer"
+                            onclick="toggleSection('viaticos')">
+                            VIÁTICOS <i data-lucide="chevron-down" id="icon-sec-viaticos" class="w-5 h-5"></i>
+                        </div>
+                        <div id="sec-viaticos" class="bg-white p-4 hidden">
+                            <table class="w-full text-sm">
+                                <thead class="bg-slate-800 text-white">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Descripción</th>
+                                        <th class="px-4 py-2 text-right">Costo</th>
+                                        <th class="px-4 py-2 text-center">Personas</th>
+                                        <th class="px-4 py-2 text-center">Días</th>
+                                        <th class="px-4 py-2 text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="view-viaticos"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-view-viaticos" class="px-4 py-2 text-right">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- IMPRESIONES -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="bg-amber-50 px-4 py-3 font-bold text-lg flex justify-between items-center cursor-pointer"
+                            onclick="toggleSection('impresiones')">
+                            IMPRESIONES <i data-lucide="chevron-down" id="icon-sec-impresiones" class="w-5 h-5"></i>
+                        </div>
+                        <div id="sec-impresiones" class="bg-white p-4 hidden">
+                            <table class="w-full text-sm">
+                                <thead class="bg-slate-800 text-white">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Impresión</th>
+                                        <th class="px-4 py-2 text-center">Dimensiones</th>
+                                        <th class="px-4 py-2 text-center">Cant.</th>
+                                        <th class="px-4 py-2 text-right">Costo/m²</th>
+                                        <th class="px-4 py-2 text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="view-impresiones"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-view-impresiones" class="px-4 py-2 text-right">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Crear Presupuesto -->
+    <div id="create-modal"
+        class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-card rounded-lg shadow-xl w-full max-w-sm p-6 border border-border">
+            <h3 class="text-lg font-bold mb-4">Nuevo Presupuesto</h3>
+            <p class="text-sm text-muted-foreground mb-4">Se creará un presupuesto vacío para el proyecto seleccionado.
+            </p>
+            <div class="flex justify-end gap-2">
+                <button onclick="document.getElementById('create-modal').classList.add('hidden')"
+                    class="px-4 py-2 rounded-md border border-input hover:bg-accent">Cancelar</button>
+                <button onclick="confirmCreateBudget()"
+                    class="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Ítem -->
+    <div id="item-modal"
+        class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-card rounded-lg shadow-xl w-full max-w-md p-6 border border-border">
+            <h3 class="text-lg font-bold mb-4">Agregar Ítem / Actividad</h3>
+            <form id="item-form" onsubmit="handleItemSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="text-sm font-medium">Descripción</label>
+                    <input type="text" id="item-desc" required
+                        class="flex h-10 w-full rounded-md border border-input px-3 py-2 bg-background">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-medium">Unidad</label>
+                        <select id="item-unit"
+                            class="flex h-10 w-full rounded-md border border-input px-3 py-2 bg-background">
+                            <option value="und">Unidad</option>
+                            <option value="m2">m2</option>
+                            <option value="m3">m3</option>
+                            <option value="ml">ml</option>
+                            <option value="glb">Global</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium">Cantidad</label>
+                        <input type="number" id="item-qty" step="0.01" min="0" required
+                            class="flex h-10 w-full rounded-md border border-input px-3 py-2 bg-background">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-sm font-medium">Costo Unitario (S/)</label>
+                    <input type="number" id="item-cost" step="0.01" min="0" required
+                        class="flex h-10 w-full rounded-md border border-input px-3 py-2 bg-background">
+                </div>
+                <div class="flex justify-end gap-2 pt-4">
+                    <button type="button" onclick="document.getElementById('item-modal').classList.add('hidden')"
+                        class="px-4 py-2 rounded-md border border-input hover:bg-accent">Cancelar</button>
+                    <button type="submit"
+                        class="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="config.js"></script>`n    <script src="script.js"></script>
+    <script src="common-header.js"></script>
+    <script>
+        // API_BASE is already defined in script.js, don't redeclare
+        let currentProjectId = null;
+        let currentBudgetId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProjects();
+            lucide.createIcons();
+            preventNegativeInputs();
+        });
+
+        // Función para prevenir entrada de valores negativos
+        function preventNegativeInputs() {
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === '-' || e.key === 'Minus') {
+                        e.preventDefault();
+                    }
+                });
+                input.addEventListener('input', function () {
+                    if (parseFloat(this.value) < 0) {
+                        this.value = Math.abs(parseFloat(this.value));
+                    }
+                });
+            });
+        }
+
+        // Cargar Proyectos
+        async function loadProjects() {
+            try {
+                const response = await fetch(`${API_BASE}/projects`);
+                if (!response.ok) {
+                    console.error("Error loading projects:", response.status);
+                    return;
+                }
+                const projects = await response.json();
+
+                const select = document.getElementById('project-select');
+                projects.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id_proyecto;
+                    opt.textContent = p.nombre;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                console.error("Error loading projects", e);
+            }
+        }
+
+        // Cargar Presupuestos
+        async function loadBudgets(projectId) {
+            currentProjectId = projectId;
+            const container = document.getElementById('budgets-container');
+            const btnCreate = document.getElementById('btn-create-budget');
+            const detailView = document.getElementById('budget-detail');
+
+            detailView.classList.add('hidden'); // Ocultar detalle al cambiar proyecto
+            container.innerHTML = '';
+
+            if (!projectId) {
+                btnCreate.classList.add('hidden');
+                return;
+            }
+
+            btnCreate.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE}/projects/${projectId}/budgets`);
+                const budgets = await response.json();
+
+                if (budgets.length === 0) {
+                    container.innerHTML = '<p class="text-muted-foreground col-span-3 text-center py-8">No hay presupuestos para este proyecto.</p>';
+                } else {
+                    budgets.forEach(b => {
+                        const card = document.createElement('div');
+                        const isPending = b.estado === 'Pendiente';
+                        const isAccepted = b.estado === 'Aceptado' || b.estado === 'Borrador';
+                        const isRejected = b.estado === 'Rechazado';
+                        const isCompleted = b.estado === 'Completado';
+
+                        // Status colors
+                        const statusColors = {
+                            'Pendiente': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+                            'Aceptado': 'bg-blue-100 text-blue-800 border-blue-300',
+                            'Borrador': 'bg-gray-100 text-gray-600 border-gray-300',
+                            'Rechazado': 'bg-red-100 text-red-800 border-red-300',
+                            'Completado': 'bg-green-100 text-green-800 border-green-300',
+                            'Solicitado': 'bg-purple-100 text-purple-800 border-purple-300'
+                        };
+                        const statusClass = statusColors[b.estado] || 'bg-gray-100 text-gray-600';
+
+                        card.className = `rounded-lg border bg-card p-6 shadow-sm transition-all ${isPending ? 'border-yellow-400 border-2' : ''}`;
+
+                        // Si hay documento de solicitud, mostrar preview link
+                        const docPreview = b.id_documento_solicitud
+                            ? `<a href="#" onclick="event.stopPropagation(); previewDocument(${b.id_documento_solicitud})" 
+                                class="text-xs text-blue-600 hover:underline flex items-center gap-1 mt-2">
+                                <i data-lucide="file-text" class="w-3 h-3"></i> Ver Documento de Solicitud
+                               </a>`
+                            : '';
+
+                        const totalDisplay = b.total_general || parseFloat(b.total) || 0;
+
+                        // Botones según estado
+                        let actionButtons = '';
+                        if (isPending) {
+                            actionButtons = `
+                                <div class="flex gap-2 mt-3 pt-3 border-t">
+                                    <button onclick="event.stopPropagation(); acceptBudget(${b.id_presupuesto})" 
+                                        class="flex-1 bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 flex items-center justify-center gap-1">
+                                        <i data-lucide="check" class="w-4 h-4"></i> Aceptar
+                                    </button>
+                                    <button onclick="event.stopPropagation(); rejectBudget(${b.id_presupuesto})" 
+                                        class="flex-1 bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700 flex items-center justify-center gap-1">
+                                        <i data-lucide="x" class="w-4 h-4"></i> Rechazar
+                                    </button>
+                                </div>`;
+                        } else if (isAccepted) {
+                            actionButtons = `
+                                <div class="flex gap-2 mt-3 pt-3 border-t">
+                                    <button onclick="event.stopPropagation(); editarPresupuesto(${b.id_presupuesto})" 
+                                        class="flex-1 bg-primary text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-primary/90 flex items-center justify-center gap-1">
+                                        <i data-lucide="edit" class="w-4 h-4"></i> Completar Presupuesto
+                                    </button>
+                                </div>`;
+                        } else if (isRejected) {
+                            actionButtons = `
+                                <div class="mt-3 pt-3 border-t text-sm text-red-600">
+                                    <strong>Motivo:</strong> ${b.motivo_rechazo || 'No especificado'}
+                                </div>`;
+                        }
+
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-bold">#${b.id_presupuesto}</span>
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClass}">${b.estado}</span>
+                            </div>
+                            <div class="text-xs text-muted-foreground mb-1">${new Date(b.fecha_creacion).toLocaleDateString()}</div>
+                            <div class="text-sm font-medium text-foreground mb-2">${b.titulo || 'Sin título'}</div>
+                            <div class="text-2xl font-bold mb-1">S/ ${totalDisplay.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</div>
+                            ${docPreview}
+                            ${actionButtons}
+                        `;
+
+                        // Solo hacer click para ver detalle si es aceptado o completado
+                        if (isAccepted || isCompleted) {
+                            card.classList.add('cursor-pointer', 'hover:shadow-md');
+                            card.onclick = () => loadBudgetDetail(b);
+                        }
+
+                        container.appendChild(card);
+                        lucide.createIcons();
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+                showError("Error al cargar presupuestos");
+            }
+        }
+
+        // Ver Detalle - Nueva versión con 5 secciones
+        async function loadBudgetDetail(budget) {
+            currentBudgetId = budget.id_presupuesto;
+
+            try {
+                // Obtener presupuesto completo con todas las categorías
+                const response = await fetch(`${API_BASE}/budgets/${budget.id_presupuesto}`);
+                const data = await response.json();
+
+                // Header
+                document.getElementById('budget-detail-title').textContent = data.titulo || `Presupuesto #${data.id_presupuesto}`;
+                document.getElementById('budget-detail-desc').textContent = data.descripcion_alcance || '';
+                document.getElementById('budget-detail-status').textContent = `Estado: ${data.estado}`;
+
+                // Documento de Solicitud (si existe)
+                const docPreviewEl = document.getElementById('doc-solicitud-preview');
+                if (docPreviewEl) {
+                    if (data.id_documento_solicitud) {
+                        docPreviewEl.classList.remove('hidden');
+                        docPreviewEl.innerHTML = `
+                            <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                                <div class="flex items-center gap-3 text-blue-800">
+                                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                                    <span class="font-medium">Documento de Solicitud Adjunto</span>
+                                </div>
+                                <button onclick="previewDocument(${data.id_documento_solicitud})" 
+                                        class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
+                                    <i data-lucide="eye" class="w-4 h-4"></i> Ver Documento
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        docPreviewEl.classList.add('hidden');
+                        docPreviewEl.innerHTML = '';
+                    }
+                }
+
+                // Materiales
+                let sumaMat = 0;
+                document.getElementById('view-materiales').innerHTML = data.materiales.map(m => {
+                    sumaMat += parseFloat(m.total);
+                    return `<tr class="border-b"><td class="px-4 py-2">${m.nombre}</td><td class="px-4 py-2 text-center">${m.cantidad}</td><td class="px-4 py-2 text-center">${m.unidad_medida}</td><td class="px-4 py-2 text-right">${parseFloat(m.costo_unitario).toFixed(2)}</td><td class="px-4 py-2 text-right">${parseFloat(m.total).toFixed(2)}</td></tr>`;
+                }).join('') || '<tr><td colspan="5" class="px-4 py-2 text-center text-muted-foreground">Sin materiales</td></tr>';
+                document.getElementById('suma-view-materiales').textContent = sumaMat.toFixed(2);
+
+                // Mano de Obra
+                let sumaMO = 0;
+                const factor = parseFloat(data.factor_mano_obra) || 1.1;
+                document.getElementById('view-mano-obra').innerHTML = data.mano_obra.map(m => {
+                    sumaMO += parseFloat(m.total);
+                    return `<tr class="border-b"><td class="px-4 py-2">${m.cargo}</td><td class="px-4 py-2 text-right">${parseFloat(m.costo_hora).toFixed(2)}</td><td class="px-4 py-2 text-center">${m.horas}</td><td class="px-4 py-2 text-center">${m.personas}</td><td class="px-4 py-2 text-right">${parseFloat(m.total).toFixed(2)}</td></tr>`;
+                }).join('') || '<tr><td colspan="5" class="px-4 py-2 text-center text-muted-foreground">Sin mano de obra</td></tr>';
+                document.getElementById('suma-view-mano-obra').textContent = sumaMO.toFixed(2);
+                document.getElementById('factor-view-mano-obra').textContent = (sumaMO * factor).toFixed(2);
+
+                // Terceros
+                let sumaTer = 0;
+                document.getElementById('view-terceros').innerHTML = data.terceros.map(t => {
+                    sumaTer += parseFloat(t.costo);
+                    return `<tr class="border-b"><td class="px-4 py-2">${t.servicio}</td><td class="px-4 py-2">${t.descripcion || '-'}</td><td class="px-4 py-2 text-right">${parseFloat(t.costo).toFixed(2)}</td></tr>`;
+                }).join('') || '<tr><td colspan="3" class="px-4 py-2 text-center text-muted-foreground">Sin terceros</td></tr>';
+                document.getElementById('suma-view-terceros').textContent = sumaTer.toFixed(2);
+
+                // Viáticos
+                let sumaVia = 0;
+                document.getElementById('view-viaticos').innerHTML = data.viaticos.map(v => {
+                    sumaVia += parseFloat(v.total);
+                    return `<tr class="border-b"><td class="px-4 py-2">${v.descripcion}</td><td class="px-4 py-2 text-right">${parseFloat(v.costo_diario).toFixed(2)}</td><td class="px-4 py-2 text-center">${v.personas}</td><td class="px-4 py-2 text-center">${v.dias}</td><td class="px-4 py-2 text-right">${parseFloat(v.total).toFixed(2)}</td></tr>`;
+                }).join('') || '<tr><td colspan="5" class="px-4 py-2 text-center text-muted-foreground">Sin viáticos</td></tr>';
+                document.getElementById('suma-view-viaticos').textContent = sumaVia.toFixed(2);
+
+                // Impresiones
+                let sumaImp = 0;
+                document.getElementById('view-impresiones').innerHTML = data.impresiones.map(i => {
+                    sumaImp += parseFloat(i.total);
+                    return `<tr class="border-b"><td class="px-4 py-2">${i.nombre}</td><td class="px-4 py-2 text-center">${i.ancho}m x ${i.largo}m</td><td class="px-4 py-2 text-center">${i.cantidad}</td><td class="px-4 py-2 text-right">${parseFloat(i.costo_m2).toFixed(2)}</td><td class="px-4 py-2 text-right">${parseFloat(i.total).toFixed(2)}</td></tr>`;
+                }).join('') || '<tr><td colspan="5" class="px-4 py-2 text-center text-muted-foreground">Sin impresiones</td></tr>';
+                document.getElementById('suma-view-impresiones').textContent = sumaImp.toFixed(2);
+
+                // Total General
+                const totalGeneral = sumaMat + (sumaMO * factor) + sumaTer + sumaVia + sumaImp;
+                document.getElementById('budget-total').textContent = `S/ ${totalGeneral.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+
+                document.getElementById('budget-detail').classList.remove('hidden');
+                lucide.createIcons();
+
+            } catch (e) {
+                console.error(e);
+                showError('Error al cargar detalle del presupuesto');
+            }
+        }
+
+        // Toggle sección expandible
+        function toggleSection(section) {
+            const content = document.getElementById(`sec-${section}`);
+            const icon = document.getElementById(`icon-sec-${section}`);
+            content.classList.toggle('hidden');
+            icon.style.transform = content.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+
+        // --- Crear Presupuesto ---
+        function openCreateBudgetModal() {
+            document.getElementById('create-modal').classList.remove('hidden');
+        }
+
+        async function confirmCreateBudget() {
+            try {
+                const response = await fetch(`${API_BASE}/budgets`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id_proyecto: currentProjectId,
+                        id_moneda: 1, // Soles por defecto
+                        estado: 'Borrador'
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('create-modal').classList.add('hidden');
+                    loadBudgets(currentProjectId); // Recargar lista
+                } else {
+                    showError("Error al crear presupuesto");
+                }
+            } catch (e) {
+                console.error(e);
+                showError("Error de conexión");
+            }
+        }
+
+        // --- Items ---
+        function openAddItemModal() {
+            document.getElementById('item-form').reset();
+            document.getElementById('item-modal').classList.remove('hidden');
+        }
+
+        async function handleItemSubmit(e) {
+            e.preventDefault();
+
+            const data = {
+                id_presupuesto: currentBudgetId,
+                descripcion: document.getElementById('item-desc').value,
+                unidad_medida: document.getElementById('item-unit').value,
+                cantidad: parseFloat(document.getElementById('item-qty').value),
+                costo_unitario: parseFloat(document.getElementById('item-cost').value)
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/items`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    document.getElementById('item-modal').classList.add('hidden');
+                    loadItems(currentBudgetId);
+                    // Actualizar total general en UI (truco rápido: recargar detalle completo o sumar en cliente)
+                    // Por simplicidad recargamos el contenedor de budgets para actualizar el total ahí también
+                    loadBudgets(currentProjectId);
+                    // Y actualizamos el total en el header del detalle manualmente para feedback inmediato
+                    const nuevoSubtotal = data.cantidad * data.costo_unitario;
+                    // (Idealmente llamaríamos a una API getBudgetById para tener el total exacto del server)
+                } else {
+                    showError("Error al guardar ítem");
+                }
+            } catch (e) {
+                console.error(e);
+                showError("Error de conexión");
+            }
+        }
+
+        async function deleteItem(id) {
+            const confirmed = await showConfirm('¿Eliminar este ítem del presupuesto?', {
+                title: '¿Eliminar ítem?',
+                confirmText: 'Eliminar',
+                type: 'danger'
+            });
+            if (!confirmed) return;
+            try {
+                const response = await fetch(`${API_BASE}/items/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    loadItems(currentBudgetId);
+                    loadBudgets(currentProjectId); // Actualizar totales
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Editar presupuesto - navega a página de edición
+        function editarPresupuesto(id) {
+            window.location.href = `editar-presupuesto.html?id=${id}`;
+        }
+
+        // Eliminar presupuesto
+        async function eliminarPresupuesto(id) {
+            const confirmed = await showConfirm('Se eliminarán todos los materiales, mano de obra, terceros, viáticos e impresiones asociados.', {
+                title: '¿Eliminar presupuesto?',
+                confirmText: 'Sí, eliminar todo',
+                type: 'danger'
+            });
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/budgets/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showSuccess("Presupuesto eliminado");
+                    document.getElementById('budget-detail').classList.add('hidden');
+                    loadBudgets(currentProjectId);
+                } else {
+                    showError("Error al eliminar presupuesto");
+                }
+            } catch (e) {
+                console.error(e);
+                showError("Error de conexión");
+            }
+        }
+
+        // ========== WORKFLOW: Aceptar/Rechazar Solicitud ==========
+
+        async function acceptBudget(id) {
+            const confirmed = await showConfirm('Una vez aceptada, deberá completar el presupuesto con materiales, mano de obra, etc.', {
+                title: '¿Aceptar solicitud?',
+                confirmText: 'Sí, aceptar',
+                type: 'success'
+            });
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/budgets/${id}/accept`, { method: 'PUT' });
+                if (response.ok) {
+                    showSuccess('Solicitud aceptada. Ahora puede completar el presupuesto.');
+                    loadBudgets(currentProjectId);
+                } else {
+                    showError('Error al aceptar solicitud');
+                }
+            } catch (e) {
+                console.error(e);
+                showError('Error de conexión');
+            }
+        }
+
+        async function rejectBudget(id) {
+            const motivo = await showPrompt('Por favor, explique por qué se rechaza esta solicitud de presupuesto.', {
+                title: 'Rechazar solicitud',
+                placeholder: 'Escriba el motivo del rechazo...',
+                confirmText: 'Rechazar',
+                cancelText: 'Cancelar'
+            });
+            if (motivo === null) return; // Usuario canceló
+
+            try {
+                const response = await fetch(`${API_BASE}/budgets/${id}/reject`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ motivo: motivo || 'Rechazado sin motivo especificado' })
+                });
+                if (response.ok) {
+                    showSuccess('Solicitud rechazada.');
+                    loadBudgets(currentProjectId);
+                } else {
+                    showError('Error al rechazar solicitud');
+                }
+            } catch (e) {
+                console.error(e);
+                showError('Error de conexión');
+            }
+        }
+
+        // Previsualizar documento de solicitud
+        async function previewDocument(docId) {
+            try {
+                const response = await fetch(`${API_BASE}/documents/${docId}`);
+                const doc = await response.json();
+
+                // Los documentos tienen sus archivos en un array 'archivos'
+                // El campo correcto es 'ruta_almacenamiento'
+                if (doc.archivos && doc.archivos.length > 0 && doc.archivos[0].ruta_almacenamiento) {
+                    window.open(`${API_ROOT}${doc.archivos[0].ruta_almacenamiento}`, '_blank', 'width=800,height=600');
+                } else {
+                    showWarning('Este documento no tiene archivos adjuntos.');
+                }
+            } catch (e) {
+                console.error(e);
+                showError('Error al cargar documento');
+            }
+        }
+
+    </script>
+</body>
+
+</html>

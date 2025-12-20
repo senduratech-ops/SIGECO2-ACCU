@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Presupuesto - Jefe de Proyecto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="tailwind-config.js"></script>
+    <style>
+        .accordion-header {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .accordion-header:hover {
+            opacity: 0.9;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .accordion-content.open {
+            max-height: 2000px;
+        }
+
+        .section-materiales {
+            background: #f4e4d4;
+        }
+
+        .section-mano-obra {
+            background: #e0e0e0;
+        }
+
+        .section-terceros {
+            background: #e0e0e0;
+        }
+
+        .section-viaticos {
+            background: #e8e8dc;
+        }
+
+        .section-impresiones {
+            background: #e8e8dc;
+        }
+
+        .table-header {
+            background: #1a2e35;
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-foreground">
+
+    <div class="min-h-screen flex w-full">
+        <!-- Sidebar -->
+        <aside id="app-sidebar"
+            class="relative transition-[width] duration-300 hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-primary text-primary-foreground">
+            <div class="h-16 flex items-center px-6 border-b border-primary-foreground/10">
+                <span
+                    class="text-3xl font-extrabold tracking-tight sidebar-title overflow-hidden whitespace-nowrap">ACCU</span>
+            </div>
+            <button id="sidebar-toggle" onclick="toggleSidebar()"
+                class="absolute -right-3 top-20 h-6 w-6 rounded-full bg-accent text-accent-foreground hover:bg-accent/80 shadow-md flex items-center justify-center transition-colors z-50 cursor-pointer border border-border">
+                <i data-lucide="chevron-left" class="h-4 w-4"></i>
+            </button>
+            <div class="flex-1 py-4 flex flex-col gap-1 px-3">
+                <div class="px-3 mb-2 text-xs font-semibold text-primary-foreground/70 uppercase tracking-wider">Menú
+                    Principal</div>
+                <a href="dashboard-jefe.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10"><i
+                        data-lucide="layout-dashboard" class="w-4 h-4"></i><span
+                        class="sidebar-text truncate">Dashboard</span></a>
+                <a href="jefe-proyectos.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10"><i
+                        data-lucide="folder-kanban" class="w-4 h-4"></i><span
+                        class="sidebar-text truncate">Proyectos</span></a>
+                <a href="jefe-presupuestos.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg bg-accent text-accent-foreground font-medium"><i
+                        data-lucide="calculator" class="w-4 h-4"></i><span
+                        class="sidebar-text truncate">Presupuestos</span></a>
+                <a href="jefe-equipo.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10"><i
+                        data-lucide="users" class="w-4 h-4"></i><span class="sidebar-text truncate">Equipo</span></a>
+                <a href="jefe-avisos.html"
+                    class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-primary-foreground hover:bg-primary-foreground/10"><i
+                        data-lucide="bell" class="w-4 h-4"></i><span class="sidebar-text truncate">Avisos</span></a>
+                <div class="mt-auto pt-4 border-t border-primary-foreground/10">
+                    <a href="index.html"
+                        class="flex items-center gap-3 px-3 py-2.5 font-medium rounded-lg text-destructive-foreground hover:bg-destructive/20"><i
+                            data-lucide="log-out" class="w-4 h-4"></i><span class="sidebar-text truncate">Cerrar
+                            Sesión</span></a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <header
+                class="h-16 bg-card border-b border-border flex items-center justify-between px-6 gap-4 sticky top-0 z-10">
+                <a href="jefe-presupuestos.html"
+                    class="text-muted-foreground hover:text-foreground flex items-center gap-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver a Presupuestos
+                </a>
+                <div class="flex items-center gap-4 ml-auto lg:ml-0">
+                    <button
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 relative">
+                        <i data-lucide="bell" class="h-5 w-5"></i>
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <button
+                            class="inline-flex items-center gap-2 hover:bg-accent hover:text-accent-foreground p-2 rounded-md transition-colors">
+                            <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                                <span
+                                    class="flex h-full w-full items-center justify-center rounded-full bg-accent text-accent-foreground font-medium">CM</span>
+                            </span>
+                            <span class="hidden md:inline text-sm font-medium">Carlos Mendoza</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 p-6 lg:p-8 overflow-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold tracking-tight text-foreground">Detalle del Presupuesto</h1>
+                </div>
+
+                <!-- Info del Proyecto -->
+                <div class="mb-6 p-4 bg-card rounded-lg border border-border shadow-sm">
+                    <label class="block text-sm font-medium mb-2">Proyecto</label>
+                    <p id="project-name" class="text-lg font-semibold">Cargando...</p>
+                </div>
+
+                <!-- Formulario -->
+                <div id="budget-form-container" class="hidden space-y-6">
+                    <!-- Cabecera -->
+                    <div class="bg-card rounded-lg border border-border p-6 shadow-sm space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Título del
+                                Presupuesto</label>
+                            <input type="text" id="titulo" readonly
+                                class="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Descripción
+                                / Alcance</label>
+                            <textarea id="descripcion" rows="3" readonly
+                                class="flex w-full rounded-md border border-input bg-muted px-3 py-2 text-sm resize-y text-muted-foreground"></textarea>
+                        </div>
+                        <div>
+                            <label
+                                class="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Estado</label>
+                            <input type="text" id="estado" readonly
+                                class="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-primary font-bold">
+                        </div>
+                    </div>
+
+                    <!-- Materiales -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="accordion-header section-materiales px-4 py-3 flex justify-between items-center"
+                            onclick="toggleAccordion('materiales')">
+                            <span class="font-bold text-lg">MATERIALES</span>
+                            <i data-lucide="chevron-down" id="icon-materiales" class="w-5 h-5 transition-transform"></i>
+                        </div>
+                        <div id="content-materiales" class="accordion-content bg-white p-4">
+                            <table class="w-full text-sm">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Nombre</th>
+                                        <th class="px-4 py-2 text-center">Cantidad</th>
+                                        <th class="px-4 py-2 text-center">Unidad</th>
+                                        <th class="px-4 py-2 text-right">Costo U.</th>
+                                        <th class="px-4 py-2 text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-materiales"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-materiales" class="px-4 py-2 text-right">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Mano de Obra -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="accordion-header section-mano-obra px-4 py-3 flex justify-between items-center"
+                            onclick="toggleAccordion('mano-obra')">
+                            <span class="font-bold text-lg">MANO DE OBRA</span>
+                            <i data-lucide="chevron-down" id="icon-mano-obra" class="w-5 h-5 transition-transform"></i>
+                        </div>
+                        <div id="content-mano-obra" class="accordion-content bg-white p-4">
+                            <table class="w-full text-sm">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Cargo</th>
+                                        <th class="px-4 py-2 text-right">Costo x Hora</th>
+                                        <th class="px-4 py-2 text-center">Horas</th>
+                                        <th class="px-4 py-2 text-center">Personas</th>
+                                        <th class="px-4 py-2 text-right">Costo Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-mano-obra"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-mano-obra" class="px-4 py-2 text-right">0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Factor (1.1)</td>
+                                        <td id="factor-mano-obra" class="px-4 py-2 text-right">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Terceros -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="accordion-header section-terceros px-4 py-3 flex justify-between items-center"
+                            onclick="toggleAccordion('terceros')">
+                            <span class="font-bold text-lg">TERCEROS</span>
+                            <i data-lucide="chevron-down" id="icon-terceros" class="w-5 h-5 transition-transform"></i>
+                        </div>
+                        <div id="content-terceros" class="accordion-content bg-white p-4">
+                            <table class="w-full text-sm">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Servicio</th>
+                                        <th class="px-4 py-2 text-left">Descripción</th>
+                                        <th class="px-4 py-2 text-right">Costo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-terceros"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="2" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-terceros" class="px-4 py-2 text-right">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Viáticos -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="accordion-header section-viaticos px-4 py-3 flex justify-between items-center"
+                            onclick="toggleAccordion('viaticos')">
+                            <span class="font-bold text-lg">VIÁTICOS</span>
+                            <i data-lucide="chevron-down" id="icon-viaticos" class="w-5 h-5 transition-transform"></i>
+                        </div>
+                        <div id="content-viaticos" class="accordion-content bg-white p-4">
+                            <table class="w-full text-sm">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Descripción</th>
+                                        <th class="px-4 py-2 text-right">Costo</th>
+                                        <th class="px-4 py-2 text-center">Personas</th>
+                                        <th class="px-4 py-2 text-center">Días</th>
+                                        <th class="px-4 py-2 text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-viaticos"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-viaticos" class="px-4 py-2 text-right">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Impresiones -->
+                    <div class="rounded-lg overflow-hidden border border-border">
+                        <div class="accordion-header section-impresiones px-4 py-3 flex justify-between items-center"
+                            onclick="toggleAccordion('impresiones')">
+                            <span class="font-bold text-lg">IMPRESIONES</span>
+                            <i data-lucide="chevron-down" id="icon-impresiones"
+                                class="w-5 h-5 transition-transform"></i>
+                        </div>
+                        <div id="content-impresiones" class="accordion-content bg-white p-4">
+                            <table class="w-full text-sm">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Impresión</th>
+                                        <th class="px-4 py-2 text-center">Dimensiones</th>
+                                        <th class="px-4 py-2 text-center">Cant.</th>
+                                        <th class="px-4 py-2 text-right">Costo U.</th>
+                                        <th class="px-4 py-2 text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-impresiones"></tbody>
+                                <tfoot class="bg-gray-100 font-bold">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-2 text-right">Suma</td>
+                                        <td id="suma-impresiones" class="px-4 py-2 text-right">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Total General -->
+                    <div class="bg-card rounded-lg border border-border p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-xl font-bold">TOTAL GENERAL</span>
+                            <span id="total-general" class="text-3xl font-bold text-primary">S/ 0.00</span>
+                        </div>
+                        <div class="flex justify-end gap-4">
+                            <a href="jefe-presupuestos.html"
+                                class="px-6 py-2 rounded-md border border-input hover:bg-accent text-sm font-medium">Volver</a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="config.js"></script>`n    <script src="script.js"></script>
+    <script>
+        let dataMateriales = [];
+        let dataManoObra = [];
+        let dataTerceros = [];
+        let dataViaticos = [];
+        let dataImpresiones = [];
+        let currentProjectId = null;
+        let currentBudgetId = null;
+        const FACTOR_MANO_OBRA = 1.1;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentBudgetId = urlParams.get('id');
+            if (!currentBudgetId) {
+                alert('No se especificó un presupuesto');
+                window.location.href = 'jefe-presupuestos.html';
+                return;
+            }
+            loadBudgetData();
+            lucide.createIcons();
+        });
+
+        async function loadBudgetData() {
+            try {
+                const res = await fetch(`${API_BASE}/budgets/${currentBudgetId}`);
+                if (!res.ok) throw new Error('Presupuesto no encontrado');
+                const data = await res.json();
+
+                currentProjectId = data.id_proyecto;
+                const projRes = await fetch(`${API_BASE}/projects/${currentProjectId}`);
+                const proj = await projRes.json();
+                document.getElementById('project-name').textContent = proj.nombre || `Proyecto #${currentProjectId}`;
+
+                document.getElementById('titulo').value = data.titulo || 'Sin Título';
+                document.getElementById('descripcion').value = data.descripcion_alcance || '';
+                document.getElementById('estado').value = data.estado || 'Desconocido';
+
+                // Mapear datos
+                dataMateriales = data.materiales.map(m => ({ ...m, total: parseFloat(m.total), costo_unitario: parseFloat(m.costo_unitario) }));
+                dataManoObra = data.mano_obra.map(m => ({ ...m, total: parseFloat(m.total), costo_hora: parseFloat(m.costo_hora) }));
+                dataTerceros = data.terceros.map(t => ({ ...t, costo: parseFloat(t.costo) }));
+                dataViaticos = data.viaticos.map(v => ({ ...v, total: parseFloat(v.total), costo_diario: parseFloat(v.costo_diario) }));
+                dataImpresiones = data.impresiones.map(i => ({ ...i, total: parseFloat(i.total), costo_m2: parseFloat(i.costo_m2) }));
+
+                renderMateriales();
+                renderManoObra();
+                renderTerceros();
+                renderViaticos();
+                renderImpresiones();
+
+                document.getElementById('budget-form-container').classList.remove('hidden');
+
+            } catch (e) {
+                console.error(e);
+                alert('Error al cargar presupuesto: ' + e.message);
+            }
+        }
+
+        function toggleAccordion(section) {
+            const content = document.getElementById(`content-${section}`);
+            const icon = document.getElementById(`icon-${section}`);
+            content.classList.toggle('open');
+            icon.style.transform = content.classList.contains('open') ? 'rotate(180deg)' : '';
+        }
+
+        function renderMateriales() {
+            const tbody = document.getElementById('tbody-materiales');
+            let suma = 0;
+            tbody.innerHTML = dataMateriales.map(m => {
+                suma += m.total;
+                return `<tr class="border-b">
+                    <td class="px-4 py-2">${m.nombre}</td>
+                    <td class="px-4 py-2 text-center">${m.cantidad}</td>
+                    <td class="px-4 py-2 text-center">${m.unidad_medida || '-'}</td>
+                    <td class="px-4 py-2 text-right">${m.costo_unitario.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-right">${m.total.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('suma-materiales').textContent = suma.toFixed(2);
+            actualizarTotalGeneral();
+        }
+
+        function renderManoObra() {
+            const tbody = document.getElementById('tbody-mano-obra');
+            let suma = 0;
+            tbody.innerHTML = dataManoObra.map(m => {
+                suma += m.total;
+                return `<tr class="border-b">
+                    <td class="px-4 py-2">${m.cargo}</td>
+                    <td class="px-4 py-2 text-right">${m.costo_hora.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-center">${m.horas}</td>
+                    <td class="px-4 py-2 text-center">${m.personas}</td>
+                    <td class="px-4 py-2 text-right">${m.total.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('suma-mano-obra').textContent = suma.toFixed(2);
+            document.getElementById('factor-mano-obra').textContent = (suma * FACTOR_MANO_OBRA).toFixed(2);
+            actualizarTotalGeneral();
+        }
+
+        function renderTerceros() {
+            const tbody = document.getElementById('tbody-terceros');
+            let suma = 0;
+            tbody.innerHTML = dataTerceros.map(t => {
+                suma += t.costo;
+                return `<tr class="border-b">
+                    <td class="px-4 py-2">${t.servicio}</td>
+                    <td class="px-4 py-2">${t.descripcion || '-'}</td>
+                    <td class="px-4 py-2 text-right">${t.costo.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('suma-terceros').textContent = suma.toFixed(2);
+            actualizarTotalGeneral();
+        }
+
+        function renderViaticos() {
+            const tbody = document.getElementById('tbody-viaticos');
+            let suma = 0;
+            tbody.innerHTML = dataViaticos.map(v => {
+                suma += v.total;
+                return `<tr class="border-b">
+                    <td class="px-4 py-2">${v.descripcion}</td>
+                    <td class="px-4 py-2 text-right">${v.costo_diario.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-center">${v.personas}</td>
+                    <td class="px-4 py-2 text-center">${v.dias}</td>
+                    <td class="px-4 py-2 text-right">${v.total.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('suma-viaticos').textContent = suma.toFixed(2);
+            actualizarTotalGeneral();
+        }
+
+        function renderImpresiones() {
+            const tbody = document.getElementById('tbody-impresiones');
+            let suma = 0;
+            tbody.innerHTML = dataImpresiones.map(m => {
+                suma += m.total;
+                const area = m.ancho * m.largo;
+                return `<tr class="border-b">
+                    <td class="px-4 py-2">${m.nombre}</td>
+                    <td class="px-4 py-2 text-center">${m.ancho}m x ${m.largo}m</td>
+                    <td class="px-4 py-2 text-center">${m.cantidad}</td>
+                    <td class="px-4 py-2 text-right">${(m.costo_m2 * area).toFixed(2)}</td>
+                    <td class="px-4 py-2 text-right">${m.total.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('suma-impresiones').textContent = suma.toFixed(2);
+            actualizarTotalGeneral();
+        }
+
+        function actualizarTotalGeneral() {
+            const mat = dataMateriales.reduce((s, m) => s + m.total, 0);
+            const mo = dataManoObra.reduce((s, m) => s + m.total, 0) * FACTOR_MANO_OBRA;
+            const ter = dataTerceros.reduce((s, t) => s + t.costo, 0);
+            const via = dataViaticos.reduce((s, v) => s + v.total, 0);
+            const imp = dataImpresiones.reduce((s, m) => s + m.total, 0);
+            const total = mat + mo + ter + via + imp;
+            document.getElementById('total-general').textContent = `S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+        }
+    </script>
+</body>
+
+</html>
