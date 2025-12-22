@@ -7,7 +7,7 @@ import 'dotenv/config';
 async function logActivity(id_proyecto, accion, descripcion, id_usuario = null) {
     try {
         await pool.query(
-            'INSERT INTO actividadProyecto (id_proyecto, id_usuario, accion, descripcion) VALUES (?, ?, ?, ?)',
+            'INSERT INTO actividadproyecto (id_proyecto, id_usuario, accion, descripcion) VALUES (?, ?, ?, ?)',
             [id_proyecto, id_usuario, accion, descripcion]
         );
     } catch (error) {
@@ -29,10 +29,10 @@ export const getProjects = async (req, res) => {
                 pp.nombre AS prioridad_nombre,
                 CONCAT(u.nombre, ' ', u.apellido) AS jefe_nombre,
                 (SELECT COUNT(*) FROM documento WHERE id_proyecto = p.id_proyecto) AS num_documentos,
-                (SELECT COUNT(*) FROM tareaProyecto WHERE id_proyecto = p.id_proyecto) AS num_tareas
+                (SELECT COUNT(*) FROM tareaproyecto WHERE id_proyecto = p.id_proyecto) AS num_tareas
             FROM proyecto p
-            LEFT JOIN estadoProyecto ep ON p.id_estado = ep.id_estado
-            LEFT JOIN prioridadProyecto pp ON p.id_prioridad = pp.id_prioridad
+            LEFT JOIN estadoproyecto ep ON p.id_estado = ep.id_estado
+            LEFT JOIN prioridadproyecto pp ON p.id_prioridad = pp.id_prioridad
             LEFT JOIN usuario u ON p.id_jefe = u.id_usuario
             ORDER BY p.created_at DESC
         `);
@@ -57,8 +57,8 @@ export const getProjectById = async (req, res) => {
                 CONCAT(u.nombre, ' ', u.apellido) AS jefe_nombre,
                 u.correo AS jefe_correo
             FROM proyecto p
-            LEFT JOIN estadoProyecto ep ON p.id_estado = ep.id_estado
-            LEFT JOIN prioridadProyecto pp ON p.id_prioridad = pp.id_prioridad
+            LEFT JOIN estadoproyecto ep ON p.id_estado = ep.id_estado
+            LEFT JOIN prioridadproyecto pp ON p.id_prioridad = pp.id_prioridad
             LEFT JOIN usuario u ON p.id_jefe = u.id_usuario
             WHERE p.id_proyecto = ?
         `, [id]);
@@ -74,8 +74,8 @@ export const getProjectById = async (req, res) => {
                 td.nombre AS tipo_nombre,
                 ed.nombre AS estado_nombre
             FROM documento d
-            LEFT JOIN tipoDocumento td ON d.id_tipo = td.id_tipo
-            LEFT JOIN estadoDocumento ed ON d.id_estado = ed.id_estado
+            LEFT JOIN tipodocumento td ON d.id_tipo = td.id_tipo
+            LEFT JOIN estadodocumento ed ON d.id_estado = ed.id_estado
             WHERE d.id_proyecto = ?
             ORDER BY d.fecha_registro DESC
         `, [id]);
@@ -85,7 +85,7 @@ export const getProjectById = async (req, res) => {
             SELECT 
                 t.*,
                 CONCAT(u.nombre, ' ', u.apellido) AS asignado_nombre
-            FROM tareaProyecto t
+            FROM tareaproyecto t
             LEFT JOIN usuario u ON t.id_usuario_asignado = u.id_usuario
             WHERE t.id_proyecto = ?
             ORDER BY t.fecha_limite ASC
@@ -100,7 +100,7 @@ export const getProjectById = async (req, res) => {
         // Obtener actividades recientes
         const [actividades] = await pool.query(`
             SELECT a.*, CONCAT(u.nombre, ' ', u.apellido) as usuario_nombre
-            FROM actividadProyecto a
+            FROM actividadproyecto a
             LEFT JOIN usuario u ON a.id_usuario = u.id_usuario
             WHERE a.id_proyecto = ?
             ORDER BY a.fecha DESC LIMIT 10
@@ -118,7 +118,7 @@ export const getProjectById = async (req, res) => {
                 SELECT e.*, d.titulo as documento_titulo, a.ruta_almacenamiento as documento_ruta
                 FROM elementoseccion e
                 LEFT JOIN documento d ON e.id_documento = d.id_documento
-                LEFT JOIN archivoDocumento a ON d.id_documento = a.id_documento
+                LEFT JOIN archivodocumento a ON d.id_documento = a.id_documento
                 WHERE e.id_seccion = ?
                 ORDER BY e.orden ASC, e.id_elemento ASC
             `, [seccion.id_seccion]);
@@ -203,7 +203,7 @@ export const deleteProject = async (req, res) => {
 
         // 4. Eliminar otras tablas dependientes
         const dependencias = [
-            'tareaproyecto', 'presupuesto', 'actividadProyecto',
+            'tareaproyecto', 'presupuesto', 'actividadproyecto',
             'comentario', 'eventoproyecto', 'registrohoras',
             'riesgoproyecto', 'usorecurso', 'contrato'
         ];
@@ -247,8 +247,8 @@ export const searchProjects = async (req, res) => {
                 pp.nombre AS prioridad_nombre,
                 CONCAT(u.nombre, ' ', u.apellido) AS jefe_nombre
             FROM proyecto p
-            LEFT JOIN estadoProyecto ep ON p.id_estado = ep.id_estado
-            LEFT JOIN prioridadProyecto pp ON p.id_prioridad = pp.id_prioridad
+            LEFT JOIN estadoproyecto ep ON p.id_estado = ep.id_estado
+            LEFT JOIN prioridadproyecto pp ON p.id_prioridad = pp.id_prioridad
             LEFT JOIN usuario u ON p.id_jefe = u.id_usuario
             WHERE p.nombre LIKE ? OR p.descripcion LIKE ?
             ORDER BY p.created_at DESC
@@ -273,8 +273,8 @@ export const getProjectsByStatus = async (req, res) => {
                 pp.nombre AS prioridad_nombre,
                 CONCAT(u.nombre, ' ', u.apellido) AS jefe_nombre
             FROM proyecto p
-            LEFT JOIN estadoProyecto ep ON p.id_estado = ep.id_estado
-            LEFT JOIN prioridadProyecto pp ON p.id_prioridad = pp.id_prioridad
+            LEFT JOIN estadoproyecto ep ON p.id_estado = ep.id_estado
+            LEFT JOIN prioridadproyecto pp ON p.id_prioridad = pp.id_prioridad
             LEFT JOIN usuario u ON p.id_jefe = u.id_usuario
             WHERE p.id_estado = ?
             ORDER BY p.created_at DESC
@@ -290,7 +290,7 @@ export const getProjectsByStatus = async (req, res) => {
 // Obtener estados de proyecto
 export const getProjectStatuses = async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM estadoProyecto ORDER BY id_estado');
+        const [rows] = await pool.query('SELECT * FROM estadoproyecto ORDER BY id_estado');
         res.json(rows);
     } catch (err) {
         console.error(err);
@@ -301,7 +301,7 @@ export const getProjectStatuses = async (req, res) => {
 // Obtener prioridades de proyecto
 export const getProjectPriorities = async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM prioridadProyecto ORDER BY id_prioridad');
+        const [rows] = await pool.query('SELECT * FROM prioridadproyecto ORDER BY id_prioridad');
         res.json(rows);
     } catch (err) {
         console.error(err);
@@ -370,10 +370,10 @@ export const getMyProjects = async (req, res) => {
                 pp.nombre AS prioridad_nombre,
                 CONCAT(u.nombre, ' ', u.apellido) AS jefe_nombre,
                 (SELECT COUNT(*) FROM documento WHERE id_proyecto = p.id_proyecto) AS num_documentos,
-                (SELECT COUNT(*) FROM tareaProyecto WHERE id_proyecto = p.id_proyecto) AS num_tareas
+                (SELECT COUNT(*) FROM tareaproyecto WHERE id_proyecto = p.id_proyecto) AS num_tareas
             FROM proyecto p
-            LEFT JOIN estadoProyecto ep ON p.id_estado = ep.id_estado
-            LEFT JOIN prioridadProyecto pp ON p.id_prioridad = pp.id_prioridad
+            LEFT JOIN estadoproyecto ep ON p.id_estado = ep.id_estado
+            LEFT JOIN prioridadproyecto pp ON p.id_prioridad = pp.id_prioridad
             LEFT JOIN usuario u ON p.id_jefe = u.id_usuario
             WHERE p.id_jefe = ?
             ORDER BY p.created_at DESC
@@ -398,12 +398,12 @@ export const getProjectStats = async (req, res) => {
 
         // Tareas completadas
         const [tasksComplete] = await pool.query(
-            "SELECT COUNT(*) as total FROM tareaProyecto WHERE id_proyecto = ? AND estado = 'Completada'", [id]
+            "SELECT COUNT(*) as total FROM tareaproyecto WHERE id_proyecto = ? AND estado = 'Completada'", [id]
         );
 
         // Tareas totales
         const [tasksTotal] = await pool.query(
-            'SELECT COUNT(*) as total FROM tareaProyecto WHERE id_proyecto = ?', [id]
+            'SELECT COUNT(*) as total FROM tareaproyecto WHERE id_proyecto = ?', [id]
         );
 
         // Presupuesto total
@@ -649,9 +649,15 @@ export const deleteElement = async (req, res) => {
 // Estadísticas Dashboard Jefe - Filtrado por usuario actual
 export const getJefeDashboardStats = async (req, res) => {
     try {
+        console.log('=== JEFE-STATS DEBUG ===');
+        console.log('Cookies recibidas:', req.cookies);
+
         // Get user ID from JWT token
         const token = req.cookies.token;
+        console.log('Token presente:', !!token);
+
         if (!token) {
+            console.log('ERROR: No hay token');
             return res.status(401).json({ message: "No autorizado - Inicie sesión" });
         }
 
@@ -659,7 +665,9 @@ export const getJefeDashboardStats = async (req, res) => {
         let decoded;
         try {
             decoded = jwt.default.verify(token, process.env.SECRET_TOKEN || 'supersecretkey');
+            console.log('Token decodificado:', decoded);
         } catch (tokenError) {
+            console.log('ERROR decodificando token:', tokenError.message);
             if (tokenError.name === 'TokenExpiredError') {
                 return res.status(401).json({ message: "Sesión expirada - Inicie sesión nuevamente" });
             }
@@ -667,6 +675,7 @@ export const getJefeDashboardStats = async (req, res) => {
         }
 
         const userId = decoded.id;
+        console.log('userId extraído:', userId);
 
         // 1. Stats Cards - Filtrados por proyectos del jefe
         const [activeProjs] = await pool.query(
@@ -675,7 +684,7 @@ export const getJefeDashboardStats = async (req, res) => {
         );
 
         const [pendingTasks] = await pool.query(
-            `SELECT COUNT(*) as c FROM tareaProyecto t
+            `SELECT COUNT(*) as c FROM tareaproyecto t
              INNER JOIN proyecto p ON t.id_proyecto = p.id_proyecto
              WHERE (t.estado = 'Pendiente' OR t.estado = 'En Progreso')
              AND p.id_jefe = ?`,
@@ -684,7 +693,7 @@ export const getJefeDashboardStats = async (req, res) => {
 
         // Hitos este mes (Tareas de proyectos del jefe con fecha limite en mes actual)
         const [hitos] = await pool.query(`
-            SELECT COUNT(*) as c FROM tareaProyecto t
+            SELECT COUNT(*) as c FROM tareaproyecto t
             INNER JOIN proyecto p ON t.id_proyecto = p.id_proyecto
             WHERE MONTH(t.fecha_limite) = MONTH(CURRENT_DATE()) 
             AND YEAR(t.fecha_limite) = YEAR(CURRENT_DATE())
@@ -693,7 +702,7 @@ export const getJefeDashboardStats = async (req, res) => {
 
         // Miembros: usuarios asignados a tareas de los proyectos del jefe
         const [members] = await pool.query(`
-            SELECT COUNT(DISTINCT t.id_usuario_asignado) as c FROM tareaProyecto t
+            SELECT COUNT(DISTINCT t.id_usuario_asignado) as c FROM tareaproyecto t
             INNER JOIN proyecto p ON t.id_proyecto = p.id_proyecto
             WHERE p.id_jefe = ? AND t.id_usuario_asignado IS NOT NULL
         `, [userId]);
@@ -702,7 +711,7 @@ export const getJefeDashboardStats = async (req, res) => {
         const [projects] = await pool.query(`
             SELECT p.id_proyecto, p.nombre, p.fecha_inicio, p.fecha_fin, ep.nombre as estado
             FROM proyecto p
-            LEFT JOIN estadoProyecto ep ON p.id_estado = ep.id_estado
+            LEFT JOIN estadoproyecto ep ON p.id_estado = ep.id_estado
             WHERE p.id_estado IN (1, 2) AND p.id_jefe = ?
             ORDER BY p.fecha_inicio DESC
             LIMIT 5
@@ -739,7 +748,7 @@ export const getJefeDashboardStats = async (req, res) => {
         // 3. Tareas Recientes de proyectos del jefe
         const [tasks] = await pool.query(`
             SELECT t.titulo, p.nombre as proyecto, p.id_prioridad, t.fecha_limite
-            FROM tareaProyecto t
+            FROM tareaproyecto t
             INNER JOIN proyecto p ON t.id_proyecto = p.id_proyecto
             WHERE t.estado != 'Completada' AND p.id_jefe = ?
             ORDER BY t.fecha_limite ASC

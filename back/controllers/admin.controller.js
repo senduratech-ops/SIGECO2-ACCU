@@ -76,7 +76,7 @@ export const getDocumentsByTypePie = async (req, res) => {
                 td.nombre,
                 td.icono,
                 COUNT(d.id_documento) as cantidad
-            FROM tipoDocumento td
+            FROM tipodocumento td
             LEFT JOIN documento d ON td.id_tipo = d.id_tipo
             GROUP BY td.id_tipo
             HAVING cantidad > 0
@@ -105,8 +105,8 @@ export const getRecentDocuments = async (req, res) => {
                 ed.color AS estado_color,
                 p.nombre AS proyecto_nombre
             FROM documento d
-            LEFT JOIN tipoDocumento td ON d.id_tipo = td.id_tipo
-            LEFT JOIN estadoDocumento ed ON d.id_estado = ed.id_estado
+            LEFT JOIN tipodocumento td ON d.id_tipo = td.id_tipo
+            LEFT JOIN estadodocumento ed ON d.id_estado = ed.id_estado
             LEFT JOIN proyecto p ON d.id_proyecto = p.id_proyecto
             ORDER BY d.fecha_registro DESC
             LIMIT ?

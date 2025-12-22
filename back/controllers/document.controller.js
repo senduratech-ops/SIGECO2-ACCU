@@ -31,11 +31,11 @@ export const getDocuments = async (req, res) => {
                 p.nombre AS proyecto_nombre,
                 u.id_usuario,
                 CONCAT(u.nombre, ' ', u.apellido) AS usuario_nombre,
-                (SELECT COUNT(*) FROM archivoDocumento WHERE id_documento = d.id_documento) AS num_archivos,
-                (SELECT SUM(tamaño) FROM archivoDocumento WHERE id_documento = d.id_documento) AS tamaño_total
+                (SELECT COUNT(*) FROM archivodocumento WHERE id_documento = d.id_documento) AS num_archivos,
+                (SELECT SUM(tamaño) FROM archivodocumento WHERE id_documento = d.id_documento) AS tamaño_total
             FROM documento d
-            LEFT JOIN tipoDocumento td ON d.id_tipo = td.id_tipo
-            LEFT JOIN estadoDocumento ed ON d.id_estado = ed.id_estado
+            LEFT JOIN tipodocumento td ON d.id_tipo = td.id_tipo
+            LEFT JOIN estadodocumento ed ON d.id_estado = ed.id_estado
             LEFT JOIN proyecto p ON d.id_proyecto = p.id_proyecto
             LEFT JOIN usuario u ON d.id_usuario_registro = u.id_usuario
             ORDER BY d.fecha_registro DESC
@@ -63,8 +63,8 @@ export const getDocumentById = async (req, res) => {
                 p.nombre AS proyecto_nombre,
                 CONCAT(u.nombre, ' ', u.apellido) AS usuario_nombre
             FROM documento d
-            LEFT JOIN tipoDocumento td ON d.id_tipo = td.id_tipo
-            LEFT JOIN estadoDocumento ed ON d.id_estado = ed.id_estado
+            LEFT JOIN tipodocumento td ON d.id_tipo = td.id_tipo
+            LEFT JOIN estadodocumento ed ON d.id_estado = ed.id_estado
             LEFT JOIN proyecto p ON d.id_proyecto = p.id_proyecto
             LEFT JOIN usuario u ON d.id_usuario_registro = u.id_usuario
             WHERE d.id_documento = ?
@@ -79,7 +79,7 @@ export const getDocumentById = async (req, res) => {
             SELECT 
                 a.*,
                 CONCAT(u.nombre, ' ', u.apellido) AS usuario_subida_nombre
-            FROM archivoDocumento a
+            FROM archivodocumento a
             LEFT JOIN usuario u ON a.id_usuario_subida = u.id_usuario
             WHERE a.id_documento = ?
             ORDER BY a.fecha_subida DESC
@@ -90,7 +90,7 @@ export const getDocumentById = async (req, res) => {
             SELECT 
                 h.*,
                 CONCAT(u.nombre, ' ', u.apellido) AS usuario_nombre
-            FROM historiaDocumento h
+            FROM historiadocumento h
             LEFT JOIN usuario u ON h.id_usuario = u.id_usuario
             WHERE h.id_documento = ?
             ORDER BY h.fecha DESC
@@ -119,10 +119,10 @@ export const getDocumentsByProject = async (req, res) => {
                 ed.nombre AS estado_nombre,
                 ed.color AS estado_color,
                 CONCAT(u.nombre, ' ', u.apellido) AS usuario_nombre,
-                (SELECT SUM(tamaño) FROM archivoDocumento WHERE id_documento = d.id_documento) AS tamaño_total
+                (SELECT SUM(tamaño) FROM archivodocumento WHERE id_documento = d.id_documento) AS tamaño_total
             FROM documento d
-            LEFT JOIN tipoDocumento td ON d.id_tipo = td.id_tipo
-            LEFT JOIN estadoDocumento ed ON d.id_estado = ed.id_estado
+            LEFT JOIN tipodocumento td ON d.id_tipo = td.id_tipo
+            LEFT JOIN estadodocumento ed ON d.id_estado = ed.id_estado
             LEFT JOIN usuario u ON d.id_usuario_registro = u.id_usuario
             WHERE d.id_proyecto = ?
             ORDER BY d.fecha_registro DESC
@@ -147,10 +147,10 @@ export const getDocumentsByType = async (req, res) => {
                 ed.color AS estado_color,
                 p.nombre AS proyecto_nombre,
                 CONCAT(u.nombre, ' ', u.apellido) AS usuario_nombre,
-                (SELECT SUM(tamaño) FROM archivoDocumento WHERE id_documento = d.id_documento) AS tamaño_total
+                (SELECT SUM(tamaño) FROM archivodocumento WHERE id_documento = d.id_documento) AS tamaño_total
             FROM documento d
-            LEFT JOIN tipoDocumento td ON d.id_tipo = td.id_tipo
-            LEFT JOIN estadoDocumento ed ON d.id_estado = ed.id_estado
+            LEFT JOIN tipodocumento td ON d.id_tipo = td.id_tipo
+            LEFT JOIN estadodocumento ed ON d.id_estado = ed.id_estado
             LEFT JOIN proyecto p ON d.id_proyecto = p.id_proyecto
             LEFT JOIN usuario u ON d.id_usuario_registro = u.id_usuario
             WHERE d.id_tipo = ?
@@ -181,10 +181,10 @@ export const searchDocuments = async (req, res) => {
                 ed.color AS estado_color,
                 p.nombre AS proyecto_nombre,
                 CONCAT(u.nombre, ' ', u.apellido) AS usuario_nombre,
-                (SELECT SUM(tamaño) FROM archivoDocumento WHERE id_documento = d.id_documento) AS tamaño_total
+                (SELECT SUM(tamaño) FROM archivodocumento WHERE id_documento = d.id_documento) AS tamaño_total
             FROM documento d
-            LEFT JOIN tipoDocumento td ON d.id_tipo = td.id_tipo
-            LEFT JOIN estadoDocumento ed ON d.id_estado = ed.id_estado
+            LEFT JOIN tipodocumento td ON d.id_tipo = td.id_tipo
+            LEFT JOIN estadodocumento ed ON d.id_estado = ed.id_estado
             LEFT JOIN proyecto p ON d.id_proyecto = p.id_proyecto
             LEFT JOIN usuario u ON d.id_usuario_registro = u.id_usuario
             WHERE d.titulo LIKE ? OR d.descripcion LIKE ? OR p.nombre LIKE ?
@@ -221,7 +221,7 @@ export const createDocument = async (req, res) => {
         // Si hay archivo, guardarlo
         if (file) {
             await pool.query(`
-                INSERT INTO archivoDocumento 
+                INSERT INTO archivodocumento 
                 (id_documento, nombre_original, nombre_archivo, ruta_almacenamiento, tipo_mime, extension, tamaño, id_usuario_subida)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             `, [
@@ -298,7 +298,7 @@ export const deleteDocument = async (req, res) => {
         const { id } = req.params;
 
         // Obtener archivos antes de eliminar
-        const [archivos] = await pool.query('SELECT * FROM archivoDocumento WHERE id_documento = ?', [id]);
+        const [archivos] = await pool.query('SELECT * FROM archivodocumento WHERE id_documento = ?', [id]);
 
         // Eliminar archivos físicos
         const uploadsPath = path.join(__dirname, '../../uploads');
@@ -341,7 +341,7 @@ export const addFileToDocument = async (req, res) => {
         }
 
         await pool.query(`
-            INSERT INTO archivoDocumento 
+            INSERT INTO archivodocumento 
             (id_documento, nombre_original, nombre_archivo, ruta_almacenamiento, tipo_mime, extension, tamaño, id_usuario_subida)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `, [
@@ -368,7 +368,7 @@ export const deleteFile = async (req, res) => {
         const { id } = req.params;
 
         // Obtener información del archivo
-        const [archivos] = await pool.query('SELECT * FROM archivoDocumento WHERE id_archivo = ?', [id]);
+        const [archivos] = await pool.query('SELECT * FROM archivodocumento WHERE id_archivo = ?', [id]);
         if (archivos.length === 0) {
             return res.status(404).json({ message: "Archivo no encontrado" });
         }
@@ -381,7 +381,7 @@ export const deleteFile = async (req, res) => {
         }
 
         // Eliminar de la base de datos
-        await pool.query('DELETE FROM archivoDocumento WHERE id_archivo = ?', [id]);
+        await pool.query('DELETE FROM archivodocumento WHERE id_archivo = ?', [id]);
 
         res.json({ message: "Archivo eliminado exitosamente" });
     } catch (err) {
@@ -400,7 +400,7 @@ export const getDocumentTypes = async (req, res) => {
             SELECT 
                 td.*,
                 (SELECT COUNT(*) FROM documento WHERE id_tipo = td.id_tipo) AS cantidad_documentos
-            FROM tipoDocumento td
+            FROM tipodocumento td
             ORDER BY td.nombre
         `);
         res.json(rows);
@@ -416,7 +416,7 @@ export const getDocumentTypes = async (req, res) => {
 
 export const getDocumentStatuses = async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM estadoDocumento ORDER BY id_estado');
+        const [rows] = await pool.query('SELECT * FROM estadodocumento ORDER BY id_estado');
         res.json(rows);
     } catch (err) {
         console.error(err);
@@ -450,7 +450,7 @@ export const getDocumentStats = async (req, res) => {
         // Documentos por tipo
         const [byType] = await pool.query(`
             SELECT td.nombre, td.icono, COUNT(d.id_documento) as cantidad
-            FROM tipoDocumento td
+            FROM tipodocumento td
             LEFT JOIN documento d ON td.id_tipo = d.id_tipo
             GROUP BY td.id_tipo
             ORDER BY cantidad DESC
@@ -459,13 +459,13 @@ export const getDocumentStats = async (req, res) => {
         // Documentos por estado
         const [byStatus] = await pool.query(`
             SELECT ed.nombre, ed.color, COUNT(d.id_documento) as cantidad
-            FROM estadoDocumento ed
+            FROM estadodocumento ed
             LEFT JOIN documento d ON ed.id_estado = d.id_estado
             GROUP BY ed.id_estado
         `);
 
         // Tamaño total de archivos
-        const [totalSize] = await pool.query('SELECT COALESCE(SUM(tamaño), 0) as total FROM archivoDocumento');
+        const [totalSize] = await pool.query('SELECT COALESCE(SUM(tamaño), 0) as total FROM archivodocumento');
 
         // Documentos recientes (últimos 7 días)
         const [recent] = await pool.query(`

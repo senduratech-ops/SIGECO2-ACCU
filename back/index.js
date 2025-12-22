@@ -27,6 +27,12 @@ app.use(cors({
 
 // Servir archivos estáticos (uploads)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use(express.static(path.join(__dirname, '../front')));
+
+// Ruta raíz → index.html del frontend
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../front/index.html'));
+});
 
 app.use(express.json());
 app.use(cookieParser());
@@ -42,7 +48,6 @@ app.use(budgetRoutes);
 app.use(laborRoutes);
 
 const PORT = process.env.PORT || 4000;
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
 });
