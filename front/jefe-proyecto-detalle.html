@@ -12,6 +12,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
     <script src="tailwind-config.js"></script>
+    <script src="config.js"></script>
 </head>
 
 <body class="bg-background text-foreground">
@@ -86,24 +87,58 @@
                 </button>
 
                 <div class="flex items-center gap-4 ml-auto lg:ml-0">
-                    <button
-                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 relative">
-                        <i data-lucide="bell" class="h-5 w-5"></i>
-                        <span
-                            class="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">3</span>
-                    </button>
+                    <!-- Notifications Dropdown -->
+                    <div class="relative">
+                        <button id="notifications-btn" onclick="toggleNotificationsDropdown()"
+                            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 relative">
+                            <i data-lucide="bell" class="h-5 w-5"></i>
+                            <span id="notifications-badge"
+                                class="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center hidden">0</span>
+                        </button>
+                        <div id="notifications-dropdown"
+                            style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; width: 360px; background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #e5e7eb; z-index: 50; max-height: 400px; overflow: hidden;">
+                            <div class="p-3 border-b flex justify-between items-center">
+                                <span class="font-semibold text-sm">Notificaciones</span>
+                                <button onclick="markAllReadFromDropdown()"
+                                    class="text-xs text-blue-600 hover:underline">Marcar todo leído</button>
+                            </div>
+                            <div id="notifications-list" class="max-h-80 overflow-y-auto">
+                                <div class="p-4 text-center text-gray-500 text-sm">Cargando...</div>
+                            </div>
+                            <div class="p-2 border-t text-center">
+                                <a href="jefe-avisos.html" class="text-xs text-blue-600 hover:underline">Ver todas las
+                                    notificaciones</a>
+                            </div>
+                        </div>
+                    </div>
 
-                    <div class="flex items-center gap-2">
-                        <button
+                    <!-- User Profile Dropdown -->
+                    <div class="relative">
+                        <button id="user-menu-btn" onclick="toggleUserMenu()"
                             class="inline-flex items-center gap-2 hover:bg-accent hover:text-accent-foreground p-2 rounded-md transition-colors">
                             <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
-                                <span
-                                    class="flex h-full w-full items-center justify-center rounded-full bg-accent text-accent-foreground font-medium">
-                                    CM
-                                </span>
+                                <span id="user-initials"
+                                    class="flex h-full w-full items-center justify-center rounded-full bg-primary text-primary-foreground font-medium">--</span>
                             </span>
-                            <span class="hidden md:inline text-sm font-medium">Carlos Mendoza</span>
+                            <span id="user-short-name" class="hidden md:inline text-sm font-medium">Cargando...</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 hidden md:block"></i>
                         </button>
+                        <div id="user-menu-dropdown"
+                            style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; width: 240px; background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #e5e7eb; z-index: 50;">
+                            <div class="p-4 border-b">
+                                <p id="user-full-name" class="font-semibold">Cargando...</p>
+                                <p id="user-email" class="text-sm text-gray-500">--</p>
+                                <span id="user-role-badge"
+                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 mt-2">--</span>
+                            </div>
+                            <div class="p-2">
+                                <a href="index.html"
+                                    class="flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md">
+                                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                                    Cerrar Sesión
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -351,6 +386,7 @@
         </div>
     </div>
 
+    <script src="header-common.js"></script>
     <script src="script.js?v=20251217"></script>
     <script>
         // Define API_BASE locally to avoid dependency issues
@@ -389,7 +425,7 @@
 
             if (!projectId) {
                 console.log('[ProjectDetails] No projectId, redirecting...');
-                window.location.href = 'admin-proyectos.html';
+                window.location.href = 'jefe-proyectos.html';
                 return;
             }
 
@@ -436,7 +472,7 @@
             } catch (error) {
                 console.error('[ProjectDetails] Error:', error);
                 alert('Error al cargar el proyecto: ' + error.message);
-                window.location.href = 'admin-proyectos.html';
+                window.location.href = 'jefe-proyectos.html';
             } finally {
                 loadingState.classList.add('hidden');
             }
